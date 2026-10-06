@@ -55,7 +55,7 @@ geometryViewport.appendChild(canvas);
 var ctx=canvas.getContext("2d");
 if(!ctx){loading.textContent="Canvas 2D is unavailable in this browser.";return}
 
-var MODEL={version:"2.76",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,0,0],pgRadius:2.4/(2*Math.sqrt(2))};
+var MODEL={version:"2.77",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,0,0],pgRadius:2.4/(2*Math.sqrt(2))};
 var EPS=1e-8, V={V:function(x,y,z){return{x:x,y:y,z:z}},add:function(a,b){return{x:a.x+b.x,y:a.y+b.y,z:a.z+b.z}},sub:function(a,b){return{x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}},mul:function(a,s){return{x:a.x*s,y:a.y*s,z:a.z*s}},dot:function(a,b){return a.x*b.x+a.y*b.y+a.z*b.z},cross:function(a,b){return{x:a.y*b.z-a.z*b.y,y:a.z*b.x-a.x*b.z,z:a.x*b.y-a.y*b.x}},len:function(a){return Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z)},norm:function(a){var l=this.len(a);return l?this.mul(a,1/l):{x:0,y:0,z:0}},dist:function(a,b){return this.len(this.sub(a,b))}};
 function rot(p,r){var x=p.x,y=p.y,z=p.z,c=Math.cos(r.x),s=Math.sin(r.x),y1=y*c-z*s,z1=y*s+z*c;y=y1;z=z1;c=Math.cos(r.y);s=Math.sin(r.y);var x1=x*c+z*s,z2=-x*s+z*c;x=x1;z=z2;c=Math.cos(r.z);s=Math.sin(r.z);x1=x*c-y*s;y1=x*s+y*c;return{x:x1,y:y1,z:z}}
 function clone(p){return{x:p.x,y:p.y,z:p.z}}
@@ -282,6 +282,16 @@ function certificateDiff(g,c){
 return {vertexCountError:g.intersectionVertices-c.expectedVertices,volumeError:g.intersectionVolume-c.analyticVolume,
 radiusError:MODEL.pgRadius-c.analyticRadius,distance:g.distanceEstimate};
 }
+function consciousnessConstraintModel(){
+var a=MODEL.pgRadius,unconstrained=8,central=4*Math.pow(a,3)/3;
+var constraints=[
+ {id:"NONE",label:"No constraint",fraction:1,description:"Full enclosing model domain."},
+ {id:"AXIAL",label:"Axial constraint",fraction:.75,description:"One modeled degree-of-freedom family is restricted."},
+ {id:"BILATERAL",label:"Bilateral constraint",fraction:.5,description:"A symmetric pair of modeled pathways is restricted."},
+ {id:"CENTRAL",label:"Central bottleneck",fraction:.25,description:"Access to the modeled central state is strongly restricted."}
+];
+return{definition:"A consciousness trap is modeled as a constraint that reduces an explicitly defined accessible state space; this is a mathematical analogy, not evidence for a literal external force.",states:constraints.map(function(c){return{id:c.id,label:c.label,accessibleVolume:unconstrained*c.fraction,accessibleFraction:c.fraction,centralVolume:central,centralAccessibility:Math.min(1,c.fraction)};}),metrics:{baselineVolume:unconstrained,centralVolume:central,baselineOccupancy:central/unconstrained},falsification:"The analogy fails as a scientific model if the constraint variable cannot be operationally defined or linked to measurable observations."};
+}
 function multiscaleModelManifest(){
 var canonicalVolume=4*Math.pow(MODEL.pgRadius,3)/3;
 var scales=[
@@ -413,11 +423,12 @@ return{
  canonicalCertificate:g.canonical,
  multiscaleModel:multiscaleModelManifest(),
  consciousnessState:consciousnessStateMetrics(),
+ consciousnessConstraints:consciousnessConstraintModel(),
  epistemicStatus:"Numerical and analytical checks support the tested canonical configuration; they do not establish a universal theorem about consciousness or prayer."
 }
 }
 function exportExperiment(){
-var payload=experimentSnapshot();payload.perturbationSuite=perturbationSuite();payload.parameterSweeps={translationR:parameterSweep("R.x",-0.9,0.9,0.15),rotationR:parameterSweep("R.z",-Math.PI/2,Math.PI/2,Math.PI/24)};payload.transitions={translationR:sweepTransitions(payload.parameterSweeps.translationR),rotationR:sweepTransitions(payload.parameterSweeps.rotationR)};payload.phaseMap=phaseMap();var ac=analyticCanonical();payload.analyticCanonical=ac;payload.certificateErrors=certificateDiff(payload.classification,{expectedVertices:6,analyticVolume:ac.octaVolume,analyticRadius:ac.octaRadius});payload.polytopeCertificate=polytopeCertificate(payload.classification.intersectionVertices,octVerts);payload.facetCertificate=canonicalFacetCertificate(payload.classification.intersectionVertices);payload.independentHalfspaceCertificate=independentHalfspaceCertificate();payload.exactCanonicalPlaneCertificate=exactCanonicalPlaneCertificate();payload.canonicalMetricCertificate=canonicalMetricCertificate();payload.closedFormIntersectionCertificate=closedFormIntersectionCertificate();payload.canonicalDerivationCertificate=canonicalDerivationCertificate();payload.canonicalSymbolicIdentityCertificate=canonicalSymbolicIdentityCertificate();payload.canonicalFaceIncidenceCertificate=canonicalFaceIncidenceCertificate(payload.classification.intersectionVertices);payload.multiscaleModelManifest=multiscaleModelManifest();payload.consciousnessStateMetrics=consciousnessStateMetrics();payload.canonicalScaleIdentityCertificate=canonicalScaleIdentityCertificate();payload.canonicalParameterStabilityCertificate=canonicalParameterStabilityCertificate();payload.canonicalAlgebraicHalfspaceCertificate=canonicalAlgebraicHalfspaceCertificate();payload.canonicalExactSetCertificate=canonicalExactSetCertificate();payload.canonicalTheoremCertificate=canonicalTheoremCertificate();payload.verificationManifest=verificationManifest();
+var payload=experimentSnapshot();payload.perturbationSuite=perturbationSuite();payload.parameterSweeps={translationR:parameterSweep("R.x",-0.9,0.9,0.15),rotationR:parameterSweep("R.z",-Math.PI/2,Math.PI/2,Math.PI/24)};payload.transitions={translationR:sweepTransitions(payload.parameterSweeps.translationR),rotationR:sweepTransitions(payload.parameterSweeps.rotationR)};payload.phaseMap=phaseMap();var ac=analyticCanonical();payload.analyticCanonical=ac;payload.certificateErrors=certificateDiff(payload.classification,{expectedVertices:6,analyticVolume:ac.octaVolume,analyticRadius:ac.octaRadius});payload.polytopeCertificate=polytopeCertificate(payload.classification.intersectionVertices,octVerts);payload.facetCertificate=canonicalFacetCertificate(payload.classification.intersectionVertices);payload.independentHalfspaceCertificate=independentHalfspaceCertificate();payload.exactCanonicalPlaneCertificate=exactCanonicalPlaneCertificate();payload.canonicalMetricCertificate=canonicalMetricCertificate();payload.closedFormIntersectionCertificate=closedFormIntersectionCertificate();payload.canonicalDerivationCertificate=canonicalDerivationCertificate();payload.canonicalSymbolicIdentityCertificate=canonicalSymbolicIdentityCertificate();payload.canonicalFaceIncidenceCertificate=canonicalFaceIncidenceCertificate(payload.classification.intersectionVertices);payload.multiscaleModelManifest=multiscaleModelManifest();payload.consciousnessStateMetrics=consciousnessStateMetrics();payload.consciousnessConstraintModel=consciousnessConstraintModel();payload.canonicalScaleIdentityCertificate=canonicalScaleIdentityCertificate();payload.canonicalParameterStabilityCertificate=canonicalParameterStabilityCertificate();payload.canonicalAlgebraicHalfspaceCertificate=canonicalAlgebraicHalfspaceCertificate();payload.canonicalExactSetCertificate=canonicalExactSetCertificate();payload.canonicalTheoremCertificate=canonicalTheoremCertificate();payload.verificationManifest=verificationManifest();
 var blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
 var url=URL.createObjectURL(blob),a=document.createElement("a");
 a.href=url;a.download="cican-v2-experiment-"+new Date().toISOString().replace(/[:.]/g,"-")+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);
