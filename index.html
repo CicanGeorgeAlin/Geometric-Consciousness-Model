@@ -75,6 +75,41 @@ root.add(pg);
 const core=new THREE.Mesh(new THREE.SphereGeometry(.18,20,20),new THREE.MeshBasicMaterial({color:0xffffff}));
 root.add(core);
 
+const inspector=document.createElement('div');
+inspector.id='inspector';
+inspector.innerHTML='<b>GEOMETRY INSPECTOR</b><br><span class="dim">Select an object below</span>';
+document.body.appendChild(inspector);
+
+const inspectorStyle=document.createElement('style');
+inspectorStyle.textContent='#inspector{position:fixed;right:18px;top:58px;width:245px;padding:12px 14px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.72);backdrop-filter:blur(6px);font:11px/1.65 monospace;color:#fff;letter-spacing:.03em;z-index:5}.dim{opacity:.55}.inspectBtn{display:block;width:100%;margin:5px 0;padding:6px 8px;background:transparent;border:1px solid rgba(255,255,255,.16);color:#fff;text-align:left;font:10px monospace;cursor:pointer}.inspectBtn:hover,.inspectBtn.active{border-color:#fff}@media(max-width:600px){#inspector{right:10px;top:52px;width:205px;font-size:10px}}';
+document.head.appendChild(inspectorStyle);
+
+const objectDefs=[
+ ['C · CUBE',cube,'Cube'],
+ ['T_L · TETRAHEDRON',tl,'Tetrahedron L'],
+ ['T_R · TETRAHEDRON',tr,'Tetrahedron R'],
+ ['PG · OCTAHEDRON',pg,'Central PG']
+];
+function fmt(v){return Number(v).toFixed(4)}
+function showInspector(i){
+ const m=objectDefs[i][1];
+ const box=new THREE.Box3().setFromObject(m), s=new THREE.Vector3();
+ box.getSize(s);
+ inspector.innerHTML='<b>GEOMETRY INSPECTOR</b><br><br><b>'+objectDefs[i][2]+'</b>'+
+ '<br>position: ('+fmt(m.position.x)+', '+fmt(m.position.y)+', '+fmt(m.position.z)+')'+
+ '<br>rotation: ('+fmt(m.rotation.x)+', '+fmt(m.rotation.y)+', '+fmt(m.rotation.z)+')'+
+ '<br>world bounds: '+fmt(s.x)+' × '+fmt(s.y)+' × '+fmt(s.z)+
+ '<br><br><span class="dim">Canonical V2 model</span>';
+ objectDefs.forEach((d,j)=>{
+  const b=document.createElement('button'); b.className='inspectBtn'+(j===i?' active':''); b.textContent=d[0];
+  b.onclick=()=>showInspector(j); inspector.appendChild(b);
+ });
+}
+objectDefs.forEach((d,i)=>{
+ const b=document.createElement('button'); b.className='inspectBtn'; b.textContent=d[0];
+ b.onclick=()=>showInspector(i); inspector.appendChild(b);
+});
+
 function insideCube(p){return Math.abs(p.x)<=C/2+1e-8&&Math.abs(p.y)<=C/2+1e-8&&Math.abs(p.z)<=C/2+1e-8}
 function tetraVertices(mesh){
  const a=[],pos=mesh.geometry.attributes.position;
