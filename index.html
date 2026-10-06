@@ -139,7 +139,8 @@ document.head.appendChild(formalStyle);
 const testPanel=document.createElement('div');
 testPanel.id="testPanel";
 testPanel.innerHTML="<b>AXIOM TESTER</b><br><span id=\"testState\">READY</span><br><button id=\"exportReport\">EXPORT EXPERIMENT REPORT</button>";
-document.body.appendChild(testPanel);\ndocument.getElementById("exportReport").onclick=exportExperimentReport;
+document.body.appendChild(testPanel);
+document.getElementById("exportReport").onclick=exportExperimentReport;
 function renderAudit(){
  const a=selfAudit();
  const el=document.getElementById("auditState");
@@ -313,9 +314,19 @@ let experimentLog=[];
 function exportExperimentReport(){
  const live=classifyGeometry();
  const validation=validationSummary();
- const reproducibility=reproducibilityMetadata();\n const methodology=methodologyRecord();\n const epistemic=epistemicRecord();\n const manifest=experimentManifest();\n const modelFingerprint=canonicalModelFingerprint();\n const audit=selfAudit();
+ const reproducibility=reproducibilityMetadata();
+ const methodology=methodologyRecord();
+ const epistemic=epistemicRecord();
+ const manifest=experimentManifest();
+ const modelFingerprint=canonicalModelFingerprint();
+ const audit=selfAudit();
  const stressSuite=runStressSuite();
- const parameterSweepResults=parameterSweep();\n const sweepConfiguration={parameter:"Tᵣ.position.x",start:-0.9,end:0.9,step:0.15,restoredCanonical:true};\n const parameterTransitions=detectTransitions(parameterSweepResults);\n const refinedTransitions=parameterTransitions.map(refineTransition);\n const sweepSummaryData=sweepSummary(parameterSweepResults,refinedTransitions);\n const stateRegions=buildStateRegions(parameterSweepResults);
+ const parameterSweepResults=parameterSweep();
+ const sweepConfiguration={parameter:"Tᵣ.position.x",start:-0.9,end:0.9,step:0.15,restoredCanonical:true};
+ const parameterTransitions=detectTransitions(parameterSweepResults);
+ const refinedTransitions=parameterTransitions.map(refineTransition);
+ const sweepSummaryData=sweepSummary(parameterSweepResults,refinedTransitions);
+ const stateRegions=buildStateRegions(parameterSweepResults);
  const certificate=buildAxiomCertificate();
  const payload={
   model:"CICAN Geometric Consciousness Model V2",
@@ -643,7 +654,9 @@ document.getElementById("rotate").onclick=(e)=>{auto=!auto;e.currentTarget.class
 document.getElementById("wire").onclick=()=>{wire=!wire;[cube,tl,tr,pg].forEach(m=>m.material.wireframe=wire);event.currentTarget.classList.toggle("active",wire)};
 document.getElementById("reset").onclick=()=>{camera.position.set(4.8,3.6,6.2);controls.target.set(0,0,0);controls.update();root.rotation.set(0,0,0)};
 addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
-loading.style.display="none"; report();\nevaluateAxiom();\n renderAudit();
+loading.style.display="none"; report();
+evaluateAxiom();
+ renderAudit();
 function animate(){requestAnimationFrame(animate);if(auto){root.rotation.y+=.0025;root.rotation.x+=.0007}controls.update();renderer.render(scene,camera)}animate();
 })();
 </script>
