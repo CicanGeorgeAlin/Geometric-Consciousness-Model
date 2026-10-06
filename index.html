@@ -55,7 +55,7 @@ geometryViewport.appendChild(canvas);
 var ctx=canvas.getContext("2d");
 if(!ctx){loading.textContent="Canvas 2D is unavailable in this browser.";return}
 
-var MODEL={version:"2.75",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,0,0],pgRadius:2.4/(2*Math.sqrt(2))};
+var MODEL={version:"2.76",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,0,0],pgRadius:2.4/(2*Math.sqrt(2))};
 var EPS=1e-8, V={V:function(x,y,z){return{x:x,y:y,z:z}},add:function(a,b){return{x:a.x+b.x,y:a.y+b.y,z:a.z+b.z}},sub:function(a,b){return{x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}},mul:function(a,s){return{x:a.x*s,y:a.y*s,z:a.z*s}},dot:function(a,b){return a.x*b.x+a.y*b.y+a.z*b.z},cross:function(a,b){return{x:a.y*b.z-a.z*b.y,y:a.z*b.x-a.x*b.z,z:a.x*b.y-a.y*b.x}},len:function(a){return Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z)},norm:function(a){var l=this.len(a);return l?this.mul(a,1/l):{x:0,y:0,z:0}},dist:function(a,b){return this.len(this.sub(a,b))}};
 function rot(p,r){var x=p.x,y=p.y,z=p.z,c=Math.cos(r.x),s=Math.sin(r.x),y1=y*c-z*s,z1=y*s+z*c;y=y1;z=z1;c=Math.cos(r.y);s=Math.sin(r.y);var x1=x*c+z*s,z2=-x*s+z*c;x=x1;z=z2;c=Math.cos(r.z);s=Math.sin(r.z);x1=x*c-y*s;y1=x*s+y*c;return{x:x1,y:y1,z:z}}
 function clone(p){return{x:p.x,y:p.y,z:p.z}}
@@ -282,6 +282,17 @@ function certificateDiff(g,c){
 return {vertexCountError:g.intersectionVertices-c.expectedVertices,volumeError:g.intersectionVolume-c.analyticVolume,
 radiusError:MODEL.pgRadius-c.analyticRadius,distance:g.distanceEstimate};
 }
+function multiscaleModelManifest(){
+var canonicalVolume=4*Math.pow(MODEL.pgRadius,3)/3;
+var scales=[
+ {id:"HUMAN",label:"Human scale",enclosure:"C / proposed skull-brain domain",left:"Tₗ / proposed left pathway",right:"Tᵣ / proposed right pathway",center:"PG / proposed pineal-central node",volume:canonicalVolume},
+ {id:"COLLECTIVE",label:"Collective scale",enclosure:"C₍collective₎ / hypothesis",left:"Tₗ₍collective₎ / hypothesis",right:"Tᵣ₍collective₎ / hypothesis",center:"PG₍collective₎ / hypothesis"},
+ {id:"PLANETARY",label:"Planetary scale",enclosure:"C₍planetary₎ / hypothesis",left:"Tₗ₍planetary₎ / hypothesis",right:"Tᵣ₍planetary₎ / hypothesis",center:"PG₍planetary₎ / hypothesis"},
+ {id:"SOLAR",label:"Solar scale",enclosure:"C₍solar₎ / hypothesis",left:"Tₗ₍solar₎ / hypothesis",right:"Tᵣ₍solar₎ / hypothesis",center:"PG₍solar₎ / hypothesis"},
+ {id:"GALACTIC",label:"Galactic scale",enclosure:"C₍galactic₎ / hypothesis",left:"Tₗ₍galactic₎ / hypothesis",right:"Tᵣ₍galactic₎ / hypothesis",center:"PG₍galactic₎ / hypothesis"}
+];
+return{version:"1.0",principle:"A common geometric template may be tested across scales without assuming that the physical interpretation is true.",scales:scales,consciousnessVolume:{symbol:"V_C",definition:"model-defined geometric volume assigned to the central/intersection state",canonicalValue:canonicalVolume,unitStatus:"dimensionless model volume until a physical calibration is independently established"},constraints:{scientific:"No scale is treated as physical fact without independent evidence.",falsifiability:"A scale-specific mapping must produce measurable predictions or it remains a hypothesis."}};
+}
 function canonicalScaleIdentityCertificate(){
 var e=MODEL.tetraEdge,a=e/(2*Math.sqrt(2)),tol=1e-12;
 var scaled=[
@@ -400,11 +411,13 @@ return{
  liveTransforms:{L:{translation:clone(objects.L.t),rotation:clone(objects.L.r)},R:{translation:clone(objects.R.t),rotation:clone(objects.R.r)}},
  classification:{state:state(g),intersectionVertices:g.iv.length,intersectionVolume:g.ivol,pgVolume:g.pvol,volumeRatio:g.ratio,distanceEstimate:g.distance,pgInsideIntersection:g.pgIn,intersectionInsidePG:g.interIn},
  canonicalCertificate:g.canonical,
+ multiscaleModel:multiscaleModelManifest(),
+ consciousnessState:consciousnessStateMetrics(),
  epistemicStatus:"Numerical and analytical checks support the tested canonical configuration; they do not establish a universal theorem about consciousness or prayer."
 }
 }
 function exportExperiment(){
-var payload=experimentSnapshot();payload.perturbationSuite=perturbationSuite();payload.parameterSweeps={translationR:parameterSweep("R.x",-0.9,0.9,0.15),rotationR:parameterSweep("R.z",-Math.PI/2,Math.PI/2,Math.PI/24)};payload.transitions={translationR:sweepTransitions(payload.parameterSweeps.translationR),rotationR:sweepTransitions(payload.parameterSweeps.rotationR)};payload.phaseMap=phaseMap();var ac=analyticCanonical();payload.analyticCanonical=ac;payload.certificateErrors=certificateDiff(payload.classification,{expectedVertices:6,analyticVolume:ac.octaVolume,analyticRadius:ac.octaRadius});payload.polytopeCertificate=polytopeCertificate(payload.classification.intersectionVertices,octVerts);payload.facetCertificate=canonicalFacetCertificate(payload.classification.intersectionVertices);payload.independentHalfspaceCertificate=independentHalfspaceCertificate();payload.exactCanonicalPlaneCertificate=exactCanonicalPlaneCertificate();payload.canonicalMetricCertificate=canonicalMetricCertificate();payload.closedFormIntersectionCertificate=closedFormIntersectionCertificate();payload.canonicalDerivationCertificate=canonicalDerivationCertificate();payload.canonicalSymbolicIdentityCertificate=canonicalSymbolicIdentityCertificate();payload.canonicalFaceIncidenceCertificate=canonicalFaceIncidenceCertificate(payload.classification.intersectionVertices);payload.canonicalScaleIdentityCertificate=canonicalScaleIdentityCertificate();payload.canonicalParameterStabilityCertificate=canonicalParameterStabilityCertificate();payload.canonicalAlgebraicHalfspaceCertificate=canonicalAlgebraicHalfspaceCertificate();payload.canonicalExactSetCertificate=canonicalExactSetCertificate();payload.canonicalTheoremCertificate=canonicalTheoremCertificate();payload.verificationManifest=verificationManifest();
+var payload=experimentSnapshot();payload.perturbationSuite=perturbationSuite();payload.parameterSweeps={translationR:parameterSweep("R.x",-0.9,0.9,0.15),rotationR:parameterSweep("R.z",-Math.PI/2,Math.PI/2,Math.PI/24)};payload.transitions={translationR:sweepTransitions(payload.parameterSweeps.translationR),rotationR:sweepTransitions(payload.parameterSweeps.rotationR)};payload.phaseMap=phaseMap();var ac=analyticCanonical();payload.analyticCanonical=ac;payload.certificateErrors=certificateDiff(payload.classification,{expectedVertices:6,analyticVolume:ac.octaVolume,analyticRadius:ac.octaRadius});payload.polytopeCertificate=polytopeCertificate(payload.classification.intersectionVertices,octVerts);payload.facetCertificate=canonicalFacetCertificate(payload.classification.intersectionVertices);payload.independentHalfspaceCertificate=independentHalfspaceCertificate();payload.exactCanonicalPlaneCertificate=exactCanonicalPlaneCertificate();payload.canonicalMetricCertificate=canonicalMetricCertificate();payload.closedFormIntersectionCertificate=closedFormIntersectionCertificate();payload.canonicalDerivationCertificate=canonicalDerivationCertificate();payload.canonicalSymbolicIdentityCertificate=canonicalSymbolicIdentityCertificate();payload.canonicalFaceIncidenceCertificate=canonicalFaceIncidenceCertificate(payload.classification.intersectionVertices);payload.multiscaleModelManifest=multiscaleModelManifest();payload.consciousnessStateMetrics=consciousnessStateMetrics();payload.canonicalScaleIdentityCertificate=canonicalScaleIdentityCertificate();payload.canonicalParameterStabilityCertificate=canonicalParameterStabilityCertificate();payload.canonicalAlgebraicHalfspaceCertificate=canonicalAlgebraicHalfspaceCertificate();payload.canonicalExactSetCertificate=canonicalExactSetCertificate();payload.canonicalTheoremCertificate=canonicalTheoremCertificate();payload.verificationManifest=verificationManifest();
 var blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
 var url=URL.createObjectURL(blob),a=document.createElement("a");
 a.href=url;a.download="cican-v2-experiment-"+new Date().toISOString().replace(/[:.]/g,"-")+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);
