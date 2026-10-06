@@ -55,20 +55,22 @@ const root=new THREE.Group(); scene.add(root);
 // V2 canonical coordinate model.
 // Every visible object is generated from these definitions.
 const MODEL={
+ version:"2.33",
  cubeHalf:1,
  tetraEdge:2.4,
- tetraLRotation:new THREE.Euler(0,0,0),
- tetraRRotation:new THREE.Euler(Math.PI/2,Math.PI/4,0),
+ tetraLRotation:[0,0,0],
+ tetraRRotation:[Math.PI/2,Math.PI/4,0],
  pgRadius:.72
 };
+function modelEuler(a){return new THREE.Euler(a[0],a[1],a[2]);}
 const C=2, T=MODEL.tetraEdge;
 const cube=new THREE.Mesh(new THREE.BoxGeometry(C,C,C),new THREE.MeshBasicMaterial({color:0x2377ff,wireframe:true,transparent:true,opacity:.32}));
 root.add(cube);
 
 const tl=new THREE.Mesh(new THREE.TetrahedronGeometry(T,0),new THREE.MeshBasicMaterial({color:0xff3030,wireframe:true,transparent:true,opacity:.75}));
-tl.rotation.copy(MODEL.tetraLRotation); root.add(tl);
+tl.rotation.copy(modelEuler(MODEL.tetraLRotation)); root.add(tl);
 const tr=new THREE.Mesh(new THREE.TetrahedronGeometry(T,0),new THREE.MeshBasicMaterial({color:0x31ff78,wireframe:true,transparent:true,opacity:.75}));
-tr.rotation.copy(MODEL.tetraRRotation); root.add(tr);
+tr.rotation.copy(modelEuler(MODEL.tetraRRotation)); root.add(tr);
 
 const pg=new THREE.Mesh(new THREE.OctahedronGeometry(MODEL.pgRadius,0),new THREE.MeshBasicMaterial({color:0xffd21a,wireframe:true,transparent:true,opacity:.95}));
 root.add(pg);
@@ -316,8 +318,8 @@ function experimentManifest(){
   canonicalParameters:{
    cubeHalf:MODEL.cubeHalf,
    tetraEdge:MODEL.tetraEdge,
-   tetraLRotation:[MODEL.tetraLRotation.x,MODEL.tetraLRotation.y,MODEL.tetraLRotation.z],
-   tetraRRotation:[MODEL.tetraRRotation.x,MODEL.tetraRRotation.y,MODEL.tetraRRotation.z],
+   tetraLRotation:MODEL.tetraLRotation,
+   tetraRRotation:MODEL.tetraRRotation,
    pgRadius:MODEL.pgRadius
   },
   tolerances:{containment:1e-8,volumeEquality:1e-6,distance:1e-5},
