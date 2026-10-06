@@ -275,14 +275,14 @@ function exportExperimentReport(){
  const validation=validationSummary();
  const reproducibility=reproducibilityMetadata();
  const stressSuite=runStressSuite();
- const parameterSweepResults=parameterSweep();\n const parameterTransitions=detectTransitions(parameterSweepResults);\n const refinedTransitions=parameterTransitions.map(refineTransition);\n const sweepSummaryData=sweepSummary(parameterSweepResults,refinedTransitions);
+ const parameterSweepResults=parameterSweep();\n const parameterTransitions=detectTransitions(parameterSweepResults);\n const refinedTransitions=parameterTransitions.map(refineTransition);\n const sweepSummaryData=sweepSummary(parameterSweepResults,refinedTransitions);\n const stateRegions=buildStateRegions(parameterSweepResults);
  const certificate=buildAxiomCertificate();
  const payload={
   model:"CICAN Geometric Consciousness Model V2",
   branch:"v2-development",
   timestamp:new Date().toISOString(),
   canonicalModel:MODEL,
-  liveGeometry:live,validation:validation,reproducibility:reproducibility,stressSuite:stressSuite,parameterSweep:parameterSweepResults,parameterTransitions:parameterTransitions,refinedTransitions:refinedTransitions,sweepSummary:sweepSummaryData,certificate:certificate,experiments:experimentLog
+  liveGeometry:live,validation:validation,reproducibility:reproducibility,stressSuite:stressSuite,parameterSweep:parameterSweepResults,parameterTransitions:parameterTransitions,refinedTransitions:refinedTransitions,sweepSummary:sweepSummaryData,stateRegions:stateRegions,certificate:certificate,experiments:experimentLog
  };
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob);
@@ -325,6 +325,19 @@ function stateAtX(x){
  const g=classifyGeometry();
  tr.position.x=saved; tr.updateMatrixWorld(true);
  return g.equality?"MATCH":(g.cubeOK&&g.intersectionVertices>=4&&g.pgInsideIntersection?"CONTAINED / UNRESOLVED":"FAILED");
+}
+function buildStateRegions(results){
+ const regions=[];
+ if(!results.length)return regions;
+ let start=results[0].x,current=results[0].state;
+ for(let i=1;i<results.length;i++){
+  if(results[i].state!==current){
+   regions.push({state:current,from:start,to:results[i-1].x,samples:i});
+   start=results[i].x;current=results[i].state;
+  }
+ }
+ regions.push({state:current,from:start,to:results[results.length-1].x,samples:results.length-(regions.reduce((n,r)=>n+r.samples,0))});
+ return regions;
 }
 function sweepSummary(results,transitions){
  const counts={MATCH:0,"CONTAINED / UNRESOLVED":0,FAILED:0};
