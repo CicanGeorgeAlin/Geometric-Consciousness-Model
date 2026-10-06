@@ -55,7 +55,7 @@ geometryViewport.appendChild(canvas);
 var ctx=canvas.getContext("2d");
 if(!ctx){loading.textContent="Canvas 2D is unavailable in this browser.";return}
 
-var MODEL={version:"2.63",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,0,0],pgRadius:2.4/(2*Math.sqrt(2))};
+var MODEL={version:"2.64",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,0,0],pgRadius:2.4/(2*Math.sqrt(2))};
 var EPS=1e-8, V={V:function(x,y,z){return{x:x,y:y,z:z}},add:function(a,b){return{x:a.x+b.x,y:a.y+b.y,z:a.z+b.z}},sub:function(a,b){return{x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}},mul:function(a,s){return{x:a.x*s,y:a.y*s,z:a.z*s}},dot:function(a,b){return a.x*b.x+a.y*b.y+a.z*b.z},cross:function(a,b){return{x:a.y*b.z-a.z*b.y,y:a.z*b.x-a.x*b.z,z:a.x*b.y-a.y*b.x}},len:function(a){return Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z)},norm:function(a){var l=this.len(a);return l?this.mul(a,1/l):{x:0,y:0,z:0}},dist:function(a,b){return this.len(this.sub(a,b))}};
 function rot(p,r){var x=p.x,y=p.y,z=p.z,c=Math.cos(r.x),s=Math.sin(r.x),y1=y*c-z*s,z1=y*s+z*c;y=y1;z=z1;c=Math.cos(r.y);s=Math.sin(r.y);var x1=x*c+z*s,z2=-x*s+z*c;x=x1;z=z2;c=Math.cos(r.z);s=Math.sin(r.z);x1=x*c-y*s;y1=x*s+y*c;return{x:x1,y:y1,z:z}}
 function clone(p){return{x:p.x,y:p.y,z:p.z}}
@@ -203,23 +203,21 @@ var targetEdge=Math.sqrt(2)*a,adjacent=edgeLengths.filter(function(x){return Mat
 return{pass:maxRadiusErr<1e-7&&maxCentroidErr<1e-7&&adjacent===12,maxRadiusError:maxRadiusErr,centroidError:maxCentroidErr,targetAdjacentEdge:targetEdge,adjacentEdges:adjacent,expectedAdjacentEdges:12};
 }
 function exactCanonicalPlaneCertificate(){
-var e=MODEL.tetraEdge,a=e/(2*Math.sqrt(2)),s=2*a;
-var expectedPlanes=[
- {n:V.V(1,1,1),d:-a},{n:V.V(1,-1,-1),d:-a},{n:V.V(-1,1,-1),d:-a},{n:V.V(-1,-1,1),d:-a},
- {n:V.V(1,1,-1),d:-a},{n:V.V(1,-1,1),d:-a},{n:V.V(-1,1,1),d:-a},{n:V.V(-1,-1,-1),d:-a}
-];
+var a=MODEL.tetraEdge/(2*Math.sqrt(2));
+var signs=[[1,1,1],[1,-1,-1],[-1,1,-1],[-1,-1,1],[1,1,-1],[1,-1,1],[-1,1,1],[-1,-1,-1]];
+var expected=signs.map(function(c){var n=V.norm(V.V(c[0],c[1],c[2]));return{n:n,q:a/V.len(V.V(c[0],c[1],c[2]))}});
 var live=tetraPlanes(objects.L).concat(tetraPlanes(objects.R));
-var errs=expected.map(function(ep){var en=norm(ep.n),best=Infinity;live.forEach(function(lp){var ln=norm(lp.n),ang=1-Math.abs(dot(en,ln)),off=Math.abs(lp.d/len(lp.n)-ep.d/len(ep.n));best=Math.min(best,ang+off);});return best;});
+var errs=expected.map(function(ep){var best=Infinity;live.forEach(function(lp){var ang=1-V.dot(ep.n,lp.n),off=Math.abs(lp.q-ep.q);best=Math.min(best,ang+off);});return best;});
 var max=Math.max.apply(null,errs);
-return {pass:max<1e-7,maxPlaneError:max,expectedFacets:8,method:"closed-form normalized plane comparison"};
+return {pass:max<1e-7,maxPlaneError:max,expectedFacets:8,method:"closed-form inward plane comparison"};
 }
 function independentHalfspaceCertificate(){
 var L=tetraPlanes(objects.L),R=tetraPlanes(objects.R),all=L.concat(R),v=MODEL.tetraEdge/(2*Math.sqrt(2));
 var expected=[V.V(v,0,0),V.V(-v,0,0),V.V(0,v,0),V.V(0,-v,0),V.V(0,0,v),V.V(0,0,-v)];
-var inside=expected.every(function(p){return all.every(function(pl){return dot(pl.n,p)+pl.d<=1e-7;});});
+var inside=expected.every(function(p){return all.every(function(pl){return dot(pl.n,p)+pl.d>=-1e-7;});});
 var boundary=expected.every(function(p){var hits=all.filter(function(pl){return Math.abs(dot(pl.n,p)+pl.d)<1e-7;});return hits.length>=2;});
 var unique=expected.filter(function(p,i){return expected.every(function(q,j){return i===j||dist(p,q)>1e-8;});}).length===6;
-return {pass:inside&&boundary&&unique,expectedVertices:6,insideAllHalfspaces:inside,eachVertexOnBoundary:boundary,uniqueVertices:unique,method:"independent closed-form vertices tested directly against live tetrahedron half-spaces"};
+return {pass:inside&&boundary&&unique,expectedVertices:6,insideAllHalfspaces:inside,eachVertexOnBoundary:boundary,uniqueVertices:unique,method:"independent closed-form vertices tested directly against live tetrahedron inward half-spaces"};
 }
 function polytopeCertificate(points,expected){
 if(points.length!==expected.length)return{pass:false,reason:"vertex-count mismatch"};
