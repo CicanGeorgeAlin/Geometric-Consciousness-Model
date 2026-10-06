@@ -275,14 +275,14 @@ function exportExperimentReport(){
  const validation=validationSummary();
  const reproducibility=reproducibilityMetadata();
  const stressSuite=runStressSuite();
- const parameterSweepResults=parameterSweep();\n const parameterTransitions=detectTransitions(parameterSweepResults);
+ const parameterSweepResults=parameterSweep();\n const parameterTransitions=detectTransitions(parameterSweepResults);\n const refinedTransitions=parameterTransitions.map(refineTransition);
  const certificate=buildAxiomCertificate();
  const payload={
   model:"CICAN Geometric Consciousness Model V2",
   branch:"v2-development",
   timestamp:new Date().toISOString(),
   canonicalModel:MODEL,
-  liveGeometry:live,validation:validation,reproducibility:reproducibility,stressSuite:stressSuite,parameterSweep:parameterSweepResults,parameterTransitions:parameterTransitions,certificate:certificate,experiments:experimentLog
+  liveGeometry:live,validation:validation,reproducibility:reproducibility,stressSuite:stressSuite,parameterSweep:parameterSweepResults,parameterTransitions:parameterTransitions,refinedTransitions:refinedTransitions,certificate:certificate,experiments:experimentLog
  };
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob);
@@ -318,6 +318,22 @@ function reproducibilityMetadata(){
   geometryEngine:"convex half-space intersection + convex hull volume",
   note:"Results are numerical computations for the current model configuration."
  };
+}
+function stateAtX(x){
+ const saved=tr.position.x;
+ tr.position.x=x; tr.updateMatrixWorld(true);tl.updateMatrixWorld(true);pg.updateMatrixWorld(true);
+ const g=classifyGeometry();
+ tr.position.x=saved; tr.updateMatrixWorld(true);
+ return g.equality?"MATCH":(g.cubeOK&&g.intersectionVertices>=4&&g.pgInsideIntersection?"CONTAINED / UNRESOLVED":"FAILED");
+}
+function refineTransition(t){
+ let lo=t.lower,hi=t.upper;
+ const from=t.from;
+ for(let i=0;i<14;i++){
+  const mid=(lo+hi)/2;
+  if(stateAtX(mid)===from) lo=mid; else hi=mid;
+ }
+ return {from:t.from,to:t.to,lower:Number(lo.toFixed(6)),upper:Number(hi.toFixed(6)),width:Number((hi-lo).toFixed(6))};
 }
 function detectTransitions(results){
  const transitions=[];
