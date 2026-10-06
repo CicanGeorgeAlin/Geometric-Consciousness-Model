@@ -446,6 +446,37 @@ return{
  falsifiability:"The index is meaningful only if the geometric state variables are independently defined and the proposed mapping to an observed system can be tested."
 };
 }
+function stateSpaceTransitionAnalysis(){
+var baseL={t:clone(objects.L.t),r:clone(objects.L.r)},baseR={t:clone(objects.R.t),r:clone(objects.R.r)};
+var xs=[],zs=[],stepX=.05,stepZ=Math.PI/180;
+for(var x=-.9;x<=.900001;x+=stepX)xs.push(Number(x.toFixed(2)));
+for(var z=-Math.PI/2;z<=Math.PI/2+1e-9;z+=stepZ)zs.push(z);
+var transitions=[],previous=null;
+for(var ix=0;ix<xs.length;ix++){
+ for(var iz=0;iz<zs.length;iz++){
+  objects.L.t=clone(baseL.t);objects.L.r=clone(baseL.r);objects.R.t=clone(baseR.t);objects.R.r=clone(baseR.r);
+  objects.R.t.x=xs[ix];objects.R.r.z=zs[iz];
+  var g=classify(),st=state(g),key=st+"|"+g.iv.length;
+  if(previous&&key!==previous.key)transitions.push({from:previous,to:{x:xs[ix],zDeg:Number((zs[iz]*180/Math.PI).toFixed(2)),state:st,vertices:g.iv.length},axis:"grid-step"});
+  previous={x:xs[ix],zDeg:Number((zs[iz]*180/Math.PI).toFixed(2)),state:st,vertices:g.iv.length,key:key};
+ }
+}
+objects.L.t=clone(baseL.t);objects.L.r=clone(baseL.r);objects.R.t=clone(baseR.t);objects.R.r=clone(baseR.r);
+return{definition:"Fine-grid transition scan over relative Tᵣ translation and rotation. A transition marks a change in classified geometric state or intersection vertex count; it is a numerical boundary locator, not an exact boundary proof.",grid:{xStep:stepX,zStepDegrees:1,xSamples:xs.length,zSamples:zs.length},transitionCount:transitions.length,transitions:transitions.slice(0,500)};
+}
+function canonicalNeighborhoodAnalysis(){
+var baseL={t:clone(objects.L.t),r:clone(objects.L.r)},baseR={t:clone(objects.R.t),r:clone(objects.R.r)};
+var offsets=[-.1,-.05,-.02,0,.02,.05,.1],samples=[];
+for(var i=0;i<offsets.length;i++)for(var j=0;j<offsets.length;j++){
+ objects.L.t=clone(baseL.t);objects.L.r=clone(baseL.r);objects.R.t=clone(baseR.t);objects.R.r=clone(baseR.r);
+ objects.R.t.x=offsets[i];objects.R.r.z=offsets[j];var g=classify(),a=geometricAccessibilityIndex();
+ samples.push({dx:offsets[i],dzDeg:Number((offsets[j]*180/Math.PI).toFixed(4)),state:state(g),vertices:g.iv.length,accessibleFraction:Number(a.accessibleFraction.toFixed(8)),constraintIndex:Number(a.constraintIndex.toFixed(8))});
+}
+objects.L.t=clone(baseL.t);objects.L.r=clone(baseL.r);objects.R.t=clone(baseR.t);objects.R.r=clone(baseR.r);
+var canonical=samples.find(function(x){return x.dx===0&&x.dzDeg===0});
+var same=samples.filter(function(x){return x.state===canonical.state&&x.vertices===canonical.vertices}).length;
+return{definition:"Local sensitivity around the canonical configuration.",offsets:offsets,samples:samples,canonicalNeighborhoodMatchCount:same,totalSamples:samples.length,matchFraction:same/samples.length};
+}
 function geometricStateSpaceModel(){
 var baseL={t:clone(objects.L.t),r:clone(objects.L.r)},baseR={t:clone(objects.R.t),r:clone(objects.R.r)};
 var txs=[-0.6,-0.3,0,0.3,0.6],rzs=[-Math.PI/6,-Math.PI/12,0,Math.PI/12,Math.PI/6],grid=[];
@@ -495,7 +526,7 @@ return{
 }
 }
 function exportExperiment(){
-var payload=experimentSnapshot();payload.perturbationSuite=perturbationSuite();payload.parameterSweeps={translationR:parameterSweep("R.x",-0.9,0.9,0.15),rotationR:parameterSweep("R.z",-Math.PI/2,Math.PI/2,Math.PI/24)};payload.transitions={translationR:sweepTransitions(payload.parameterSweeps.translationR),rotationR:sweepTransitions(payload.parameterSweeps.rotationR)};payload.phaseMap=phaseMap();var ac=analyticCanonical();payload.analyticCanonical=ac;payload.certificateErrors=certificateDiff(payload.classification,{expectedVertices:6,analyticVolume:ac.octaVolume,analyticRadius:ac.octaRadius});payload.polytopeCertificate=polytopeCertificate(payload.classification.intersectionVertices,octVerts);payload.facetCertificate=canonicalFacetCertificate(payload.classification.intersectionVertices);payload.independentHalfspaceCertificate=independentHalfspaceCertificate();payload.exactCanonicalPlaneCertificate=exactCanonicalPlaneCertificate();payload.canonicalMetricCertificate=canonicalMetricCertificate();payload.closedFormIntersectionCertificate=closedFormIntersectionCertificate();payload.canonicalDerivationCertificate=canonicalDerivationCertificate();payload.canonicalSymbolicIdentityCertificate=canonicalSymbolicIdentityCertificate();payload.canonicalFaceIncidenceCertificate=canonicalFaceIncidenceCertificate(payload.classification.intersectionVertices);payload.multiscaleModelManifest=multiscaleModelManifest();payload.consciousnessStateMetrics=consciousnessStateMetrics();payload.consciousnessConstraintModel=consciousnessConstraintModel();payload.geometricConstraintExperiments=geometricConstraintExperiments();payload.geometricAccessibility=geometricAccessibilityIndex();payload.geometricAccessibilitySweep=geometricAccessibilitySweep();payload.geometricStateSpace=geometricStateSpaceModel();payload.canonicalScaleIdentityCertificate=canonicalScaleIdentityCertificate();payload.canonicalParameterStabilityCertificate=canonicalParameterStabilityCertificate();payload.canonicalAlgebraicHalfspaceCertificate=canonicalAlgebraicHalfspaceCertificate();payload.canonicalExactSetCertificate=canonicalExactSetCertificate();payload.canonicalTheoremCertificate=canonicalTheoremCertificate();payload.verificationManifest=verificationManifest();
+var payload=experimentSnapshot();payload.perturbationSuite=perturbationSuite();payload.parameterSweeps={translationR:parameterSweep("R.x",-0.9,0.9,0.15),rotationR:parameterSweep("R.z",-Math.PI/2,Math.PI/2,Math.PI/24)};payload.transitions={translationR:sweepTransitions(payload.parameterSweeps.translationR),rotationR:sweepTransitions(payload.parameterSweeps.rotationR)};payload.phaseMap=phaseMap();var ac=analyticCanonical();payload.analyticCanonical=ac;payload.certificateErrors=certificateDiff(payload.classification,{expectedVertices:6,analyticVolume:ac.octaVolume,analyticRadius:ac.octaRadius});payload.polytopeCertificate=polytopeCertificate(payload.classification.intersectionVertices,octVerts);payload.facetCertificate=canonicalFacetCertificate(payload.classification.intersectionVertices);payload.independentHalfspaceCertificate=independentHalfspaceCertificate();payload.exactCanonicalPlaneCertificate=exactCanonicalPlaneCertificate();payload.canonicalMetricCertificate=canonicalMetricCertificate();payload.closedFormIntersectionCertificate=closedFormIntersectionCertificate();payload.canonicalDerivationCertificate=canonicalDerivationCertificate();payload.canonicalSymbolicIdentityCertificate=canonicalSymbolicIdentityCertificate();payload.canonicalFaceIncidenceCertificate=canonicalFaceIncidenceCertificate(payload.classification.intersectionVertices);payload.multiscaleModelManifest=multiscaleModelManifest();payload.consciousnessStateMetrics=consciousnessStateMetrics();payload.consciousnessConstraintModel=consciousnessConstraintModel();payload.geometricConstraintExperiments=geometricConstraintExperiments();payload.geometricAccessibility=geometricAccessibilityIndex();payload.geometricAccessibilitySweep=geometricAccessibilitySweep();payload.geometricStateSpace=geometricStateSpaceModel();payload.stateSpaceTransitions=stateSpaceTransitionAnalysis();payload.canonicalNeighborhood=canonicalNeighborhoodAnalysis();payload.canonicalScaleIdentityCertificate=canonicalScaleIdentityCertificate();payload.canonicalParameterStabilityCertificate=canonicalParameterStabilityCertificate();payload.canonicalAlgebraicHalfspaceCertificate=canonicalAlgebraicHalfspaceCertificate();payload.canonicalExactSetCertificate=canonicalExactSetCertificate();payload.canonicalTheoremCertificate=canonicalTheoremCertificate();payload.verificationManifest=verificationManifest();
 var blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
 var url=URL.createObjectURL(blob),a=document.createElement("a");
 a.href=url;a.download="cican-v2-experiment-"+new Date().toISOString().replace(/[:.]/g,"-")+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);
