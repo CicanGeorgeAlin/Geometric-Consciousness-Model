@@ -55,7 +55,7 @@ document.getElementById("app").appendChild(canvas);
 var ctx=canvas.getContext("2d");
 if(!ctx){loading.textContent="Canvas 2D is unavailable in this browser.";return}
 
-var MODEL={version:"2.47",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,0,0],pgRadius:2.4/(2*Math.sqrt(2))};
+var MODEL={version:"2.48",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,0,0],pgRadius:2.4/(2*Math.sqrt(2))};
 var EPS=1e-8, V={x:function(x,y,z){return{x:x,y:y,z:z}},add:function(a,b){return{x:a.x+b.x,y:a.y+b.y,z:a.z+b.z}},sub:function(a,b){return{x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}},mul:function(a,s){return{x:a.x*s,y:a.y*s,z:a.z*s}},dot:function(a,b){return a.x*b.x+a.y*b.y+a.z*b.z},cross:function(a,b){return{x:a.y*b.z-a.z*b.y,y:a.z*b.x-a.x*b.z,z:a.x*b.y-a.y*b.x}},len:function(a){return Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z)},norm:function(a){var l=this.len(a);return l?this.mul(a,1/l):{x:0,y:0,z:0}},dist:function(a,b){return this.len(this.sub(a,b))}};
 function rot(p,r){var x=p.x,y=p.y,z=p.z,c=Math.cos(r.x),s=Math.sin(r.x),y1=y*c-z*s,z1=y*s+z*c;y=y1;z=z1;c=Math.cos(r.y);s=Math.sin(r.y);var x1=x*c+z*s,z2=-x*s+z*c;x=x1;z=z2;c=Math.cos(r.z);s=Math.sin(r.z);x1=x*c-y*s;y1=x*s+y*c;return{x:x1,y:y1,z:z}}
 function clone(p){return{x:p.x,y:p.y,z:p.z}}
@@ -155,6 +155,22 @@ var g=classify();out.push({x:Number(x.toFixed(4)),state:state(g),vertices:g.iv.l
 objects.L.t=clone(baseL.t);objects.L.r=clone(baseL.r);objects.R.t=clone(baseR.t);objects.R.r=clone(baseR.r);
 return out;
 }
+function polytopeCertificate(points,expected){
+if(points.length!==expected.length)return{pass:false,reason:"vertex-count mismatch"};
+var max=0;for(var i=0;i<expected.length;i++){var best=Infinity;for(var j=0;j<points.length;j++)best=Math.min(best,dist(points[j],expected[i]));max=Math.max(max,best);}
+return{pass:max<1e-7,maxNearestError:max,expectedVertices:expected.length,actualVertices:points.length};
+}
+function canonicalFacetCertificate(iv){
+var expected=octVerts, faces=[];
+for(var i=0;i<expected.length;i++)for(var j=i+1;j<expected.length;j++)for(var k=j+1;k<expected.length;k++){
+var p=planeFrom3(expected[i],expected[j],expected[k]), ok=true;
+for(var q=0;q<expected.length;q++)if(i!==q&&j!==q&&k!==q&&Math.abs(dot(p.n,expected[q])+p.d)<1e-7)ok=false;
+if(ok)faces.push(p);
+}
+var matched=0;
+faces.forEach(function(f){var hits=iv.filter(function(p){return Math.abs(dot(f.n,p)+f.d)<1e-7;});if(hits.length>=3)matched++;});
+return{pass:faces.length===8&&matched===8,expectedFacets:faces.length,matchedFacets:matched};
+}
 function analyticCanonical(){
 var e=MODEL.tetraEdge,r=e/(2*Math.sqrt(2)),v=4*Math.pow(r,3)/3;
 return {edge:e,octaRadius:r,octaVolume:v,cubeHalf:MODEL.cubeHalf,insideCube:r<=MODEL.cubeHalf,
@@ -205,7 +221,7 @@ return{
 }
 }
 function exportExperiment(){
-var payload=experimentSnapshot();payload.perturbationSuite=perturbationSuite();payload.parameterSweeps={translationR:parameterSweep("R.x",-0.9,0.9,0.15),rotationR:parameterSweep("R.z",-Math.PI/2,Math.PI/2,Math.PI/24)};payload.transitions={translationR:sweepTransitions(payload.parameterSweeps.translationR),rotationR:sweepTransitions(payload.parameterSweeps.rotationR)};payload.phaseMap=phaseMap();var ac=analyticCanonical();payload.analyticCanonical=ac;payload.certificateErrors=certificateDiff(payload.classification,{expectedVertices:6,analyticVolume:ac.octaVolume,analyticRadius:ac.octaRadius});
+var payload=experimentSnapshot();payload.perturbationSuite=perturbationSuite();payload.parameterSweeps={translationR:parameterSweep("R.x",-0.9,0.9,0.15),rotationR:parameterSweep("R.z",-Math.PI/2,Math.PI/2,Math.PI/24)};payload.transitions={translationR:sweepTransitions(payload.parameterSweeps.translationR),rotationR:sweepTransitions(payload.parameterSweeps.rotationR)};payload.phaseMap=phaseMap();var ac=analyticCanonical();payload.analyticCanonical=ac;payload.certificateErrors=certificateDiff(payload.classification,{expectedVertices:6,analyticVolume:ac.octaVolume,analyticRadius:ac.octaRadius});payload.polytopeCertificate=polytopeCertificate(payload.classification.intersectionVertices,octVerts);payload.facetCertificate=canonicalFacetCertificate(payload.classification.intersectionVertices);
 var blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
 var url=URL.createObjectURL(blob),a=document.createElement("a");
 a.href=url;a.download="cican-v2-experiment-"+new Date().toISOString().replace(/[:.]/g,"-")+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);
