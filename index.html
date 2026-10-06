@@ -173,6 +173,29 @@ function hullVolume(points){
  }
  return vol;
 }
+const perturb=document.createElement('div');
+perturb.id="perturb";
+perturb.innerHTML='<b>MODEL CONTROLS</b><br><button id="moveL">Tₗ +X</button><button id="moveR">Tᵣ −X</button><button id="twist">TWIST Tᵣ</button><button id="resetModel">RESET MODEL</button>';
+document.body.appendChild(perturb);
+const perturbStyle=document.createElement('style');
+perturbStyle.textContent='#perturb{position:fixed;left:18px;bottom:58px;width:245px;padding:10px 12px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.72);backdrop-filter:blur(6px);font:10px monospace;color:#fff;z-index:5}#perturb button{margin:4px 3px 0 0;padding:5px 7px;background:transparent;border:1px solid rgba(255,255,255,.2);color:#fff;font:9px monospace;cursor:pointer}#perturb button:hover{border-color:#fff}@media(max-width:600px){#perturb{left:10px;width:205px}}';
+document.head.appendChild(perturbStyle);
+const canonicalTransforms={
+ L:{x:tl.position.x,y:tl.position.y,z:tl.position.z,rx:tl.rotation.x,ry:tl.rotation.y,rz:tl.rotation.z},
+ R:{x:tr.position.x,y:tr.position.y,z:tr.position.z,rx:tr.rotation.x,ry:tr.rotation.y,rz:tr.rotation.z}
+};
+function resetModel(){
+ tl.position.set(canonicalTransforms.L.x,canonicalTransforms.L.y,canonicalTransforms.L.z);
+ tl.rotation.set(canonicalTransforms.L.rx,canonicalTransforms.L.ry,canonicalTransforms.L.rz);
+ tr.position.set(canonicalTransforms.R.x,canonicalTransforms.R.y,canonicalTransforms.R.z);
+ tr.rotation.set(canonicalTransforms.R.rx,canonicalTransforms.R.ry,canonicalTransforms.R.rz);
+ evaluateAxiom();
+}
+document.getElementById("moveL").onclick=()=>{tl.position.x+=.15;evaluateAxiom()};
+document.getElementById("moveR").onclick=()=>{tr.position.x-=.15;evaluateAxiom()};
+document.getElementById("twist").onclick=()=>{tr.rotation.z+=Math.PI/12;evaluateAxiom()};
+document.getElementById("resetModel").onclick=resetModel;
+
 function evaluateAxiom(){
  cube.updateMatrixWorld(true); tl.updateMatrixWorld(true); tr.updateMatrixWorld(true); pg.updateMatrixWorld(true);
  const pv=tetraVertices(pg);
