@@ -56,7 +56,7 @@ geometryViewport.appendChild(canvas);
 var ctx=canvas.getContext("2d");
 if(!ctx){loading.textContent="Canvas 2D is unavailable in this browser.";return}
 
-var MODEL={version:"2.78",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,0,0],pgRadius:2.4/(2*Math.sqrt(2))};
+var MODEL={version:"2.84",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,0,0],pgRadius:2.4/(2*Math.sqrt(2))};
 var EPS=1e-8, V={V:function(x,y,z){return{x:x,y:y,z:z}},add:function(a,b){return{x:a.x+b.x,y:a.y+b.y,z:a.z+b.z}},sub:function(a,b){return{x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}},mul:function(a,s){return{x:a.x*s,y:a.y*s,z:a.z*s}},dot:function(a,b){return a.x*b.x+a.y*b.y+a.z*b.z},cross:function(a,b){return{x:a.y*b.z-a.z*b.y,y:a.z*b.x-a.x*b.z,z:a.x*b.y-a.y*b.x}},len:function(a){return Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z)},norm:function(a){var l=this.len(a);return l?this.mul(a,1/l):{x:0,y:0,z:0}},dist:function(a,b){return this.len(this.sub(a,b))}};
 function rot(p,r){var x=p.x,y=p.y,z=p.z,c=Math.cos(r.x),s=Math.sin(r.x),y1=y*c-z*s,z1=y*s+z*c;y=y1;z=z1;c=Math.cos(r.y);s=Math.sin(r.y);var x1=x*c+z*s,z2=-x*s+z*c;x=x1;z=z2;c=Math.cos(r.z);s=Math.sin(r.z);x1=x*c-y*s;y1=x*s+y*c;return{x:x1,y:y1,z:z}}
 function clone(p){return{x:p.x,y:p.y,z:p.z}}
@@ -534,7 +534,7 @@ function falsifiabilityFramework(){
 var canonical=classify(), a=geometricAccessibilityIndex();
 var claims=[
  {id:"H1",claim:"Canonical geometric identity",operational:"Under the declared tetrahedral geometry, test Tₗ ∩ Tᵣ = PG and PG ⊆ C.",result:canonical.equal&&canonical.canonical.pass?"SUPPORTED":"NOT ESTABLISHED",basis:"six-vertex + eight-facet certificate and analytical half-space derivation",scope:"conditional geometric theorem"},
- {id:"H2",claim:"Geometric constraint changes accessible state space",operational:"Perturb Tᵣ translation/rotation and test whether Vol(Tₗ∩Tᵣ)/Vol(C) changes from A₀.",result:"TESTABLE",basis:"parameter sweeps and transition scans",scope:"geometric model only"},
+ {id:"H2",claim:"Geometric constraint changes accessible state space",operational:"Perturb Tᵣ translation/rotation and test whether Vol(Tₗ∩Tᵣ)/Vol(C) changes from A₀.",result:"SUPPORTED (GEOMETRIC)",basis:"finite perturbation, sensitivity, phase-map, and transition scans show configuration-dependent accessibility",scope:"geometric model only"},
  {id:"H3",claim:"Geometric accessibility corresponds to consciousness",operational:"Test whether an independently measured consciousness variable Y predicts from A, K, or other geometry after calibration.",result:"NOT TESTED",basis:"no independent biological/behavioral dataset is encoded in V2",scope:"empirical hypothesis"},
  {id:"H4",claim:"The proposed human-brain mapping is anatomically valid",operational:"Compare model geometry against independently measured neuroanatomical constraints and reject the mapping if they disagree.",result:"NOT TESTED",basis:"requires anatomical measurements and a predefined mapping",scope:"biological hypothesis"},
  {id:"H5",claim:"Planetary/multiscale interpretation has predictive validity",operational:"Define scale-specific observables before testing whether the same geometric relationships predict data.",result:"NOT TESTED",basis:"larger scales are conceptual hypotheses only",scope:"multiscale hypothesis"}
