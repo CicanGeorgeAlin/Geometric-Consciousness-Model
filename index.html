@@ -7,14 +7,14 @@
 <meta name="description" content="CICAN Geometric Consciousness Model V2 — self-contained geometric laboratory.">
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:Inter,system-ui,Arial,sans-serif}
-#app{position:fixed;inset:0}canvas{display:block;width:100%;height:100%;touch-action:none}
+#app{position:fixed;inset:0}#geometryViewport{position:fixed;left:315px;right:315px;top:58px;bottom:220px;z-index:1;overflow:hidden}#geometryViewport canvas{display:block;width:100%;height:100%;touch-action:none}
 .hud{position:fixed;z-index:5}.top{top:16px;left:18px}.brand{font-size:14px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}.sub{margin-top:5px;font-size:10px;letter-spacing:.1em;opacity:.58}
 .axiom{top:16px;right:18px;text-align:right;font:14px ui-monospace,monospace}.status{margin-top:6px;font-size:9px;opacity:.65}
 .panel{background:rgba(0,0,0,.78);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);padding:11px 12px;font:10px/1.6 ui-monospace,monospace}
 #left{left:18px;bottom:18px;width:285px}.row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.btn{border:1px solid rgba(255,255,255,.24);background:#080808;color:#fff;padding:7px 9px;font:10px ui-monospace,monospace;cursor:pointer}.btn.active{background:#fff;color:#000}
 #right{right:18px;top:58px;width:285px;max-height:calc(100vh - 76px);overflow:auto}.section{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.12)}.section:last-child{border-bottom:0;margin-bottom:0}.ok{color:#baffba}.warn{color:#ffd37a}.bad{color:#ff8b8b}.dim{opacity:.55}
 #loading{position:fixed;inset:0;display:grid;place-items:center;background:#000;z-index:20;font:12px ui-monospace,monospace}
-.mobile-focus{display:none;position:fixed;z-index:10;right:10px;bottom:max(8px,env(safe-area-inset-bottom));box-shadow:0 4px 18px rgba(0,0,0,.5)}body.focus-model #right,body.focus-model #left{display:none!important}body.focus-model .mobile-focus{display:block}@media(max-width:700px){html,body{overflow:hidden}.top{top:max(8px,env(safe-area-inset-top));left:10px;right:10px;max-width:58vw}.brand{font-size:9px;letter-spacing:.12em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sub{font-size:7px;margin-top:3px}.axiom{top:max(8px,env(safe-area-inset-top));right:10px;max-width:38vw;font-size:8px;line-height:1.25;white-space:nowrap}.status{font-size:7px;margin-top:3px}.panel{padding:8px 9px;font-size:9px;line-height:1.45;backdrop-filter:blur(5px)}#right{left:10px;right:10px;top:48px;width:auto;max-width:none;height:37vh;max-height:37vh;overflow:auto;-webkit-overflow-scrolling:touch}.section{margin-bottom:8px;padding-bottom:7px}.section:last-child{margin-bottom:0}.btn{padding:8px 8px;font-size:9px;min-height:34px;touch-action:manipulation}.row{gap:5px;margin-bottom:6px}#left{left:10px;right:10px;bottom:max(8px,env(safe-area-inset-bottom));width:auto;max-width:none;height:29vh;max-height:29vh;overflow:auto;-webkit-overflow-scrolling:touch}#metrics{font-size:8px;line-height:1.35}.hud{z-index:5}canvas{touch-action:none}}
+.mobile-focus{display:none;position:fixed;z-index:10;right:10px;bottom:max(8px,env(safe-area-inset-bottom));box-shadow:0 4px 18px rgba(0,0,0,.5)}body.focus-model #right,body.focus-model #left{display:none!important}body.focus-model #geometryViewport{left:0;right:0;top:0;bottom:0;z-index:4}body.focus-model .mobile-focus{display:block}@media(max-width:700px){html,body{overflow:hidden}.top{top:max(8px,env(safe-area-inset-top));left:10px;right:10px;max-width:58vw}.brand{font-size:9px;letter-spacing:.12em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sub{font-size:7px;margin-top:3px}.axiom{top:max(8px,env(safe-area-inset-top));right:10px;max-width:38vw;font-size:8px;line-height:1.25;white-space:nowrap}.status{font-size:7px;margin-top:3px}.panel{padding:8px 9px;font-size:9px;line-height:1.45;backdrop-filter:blur(5px)}#geometryViewport{left:10px;right:10px;top:calc(48px + 37vh + 6px);bottom:calc(29vh + max(8px,env(safe-area-inset-bottom)) + 6px);border:1px solid rgba(255,255,255,.08)}#right{left:10px;right:10px;top:48px;width:auto;max-width:none;height:37vh;max-height:37vh;overflow:auto;-webkit-overflow-scrolling:touch}.section{margin-bottom:8px;padding-bottom:7px}.section:last-child{margin-bottom:0}.btn{padding:8px 8px;font-size:9px;min-height:34px;touch-action:manipulation}.row{gap:5px;margin-bottom:6px}#left{left:10px;right:10px;bottom:max(8px,env(safe-area-inset-bottom));width:auto;max-width:none;height:29vh;max-height:29vh;overflow:auto;-webkit-overflow-scrolling:touch}#metrics{font-size:8px;line-height:1.35}.hud{z-index:5}canvas{touch-action:none}}
 </style>
 </head>
 <body>
@@ -49,13 +49,13 @@ I = Tₗ ∩ Tᵣ<br><span class="dim">Set equality requires actual equality, no
 <script>
 (function(){
 "use strict";
-var loading=document.getElementById("loading");window.addEventListener("error",function(e){loading.innerHTML="V2 INITIALIZATION ERROR<br><small>"+String(e.message||"Runtime error")+"</small>"});
+var loading=document.getElementById("loading");var geometryViewport=document.getElementById("geometryViewport");window.addEventListener("error",function(e){loading.innerHTML="V2 INITIALIZATION ERROR<br><small>"+String(e.message||"Runtime error")+"</small>"});
 var canvas=document.createElement("canvas");
-document.getElementById("app").appendChild(canvas);
+geometryViewport.appendChild(canvas);
 var ctx=canvas.getContext("2d");
 if(!ctx){loading.textContent="Canvas 2D is unavailable in this browser.";return}
 
-var MODEL={version:"2.55",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,0,0],pgRadius:2.4/(2*Math.sqrt(2))};
+var MODEL={version:"2.56",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,0,0],pgRadius:2.4/(2*Math.sqrt(2))};
 var EPS=1e-8, V={V:function(x,y,z){return{x:x,y:y,z:z}},add:function(a,b){return{x:a.x+b.x,y:a.y+b.y,z:a.z+b.z}},sub:function(a,b){return{x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}},mul:function(a,s){return{x:a.x*s,y:a.y*s,z:a.z*s}},dot:function(a,b){return a.x*b.x+a.y*b.y+a.z*b.z},cross:function(a,b){return{x:a.y*b.z-a.z*b.y,y:a.z*b.x-a.x*b.z,z:a.x*b.y-a.y*b.x}},len:function(a){return Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z)},norm:function(a){var l=this.len(a);return l?this.mul(a,1/l):{x:0,y:0,z:0}},dist:function(a,b){return this.len(this.sub(a,b))}};
 function rot(p,r){var x=p.x,y=p.y,z=p.z,c=Math.cos(r.x),s=Math.sin(r.x),y1=y*c-z*s,z1=y*s+z*c;y=y1;z=z1;c=Math.cos(r.y);s=Math.sin(r.y);var x1=x*c+z*s,z2=-x*s+z*c;x=x1;z=z2;c=Math.cos(r.z);s=Math.sin(r.z);x1=x*c-y*s;y1=x*s+y*c;return{x:x1,y:y1,z:z}}
 function clone(p){return{x:p.x,y:p.y,z:p.z}}
@@ -248,7 +248,7 @@ a.href=url;a.download="cican-v2-experiment-"+new Date().toISOString().replace(/[
 function project(p){
 var cy=Math.cos(view.yaw),sy=Math.sin(view.yaw),cp=Math.cos(view.pitch),sp=Math.sin(view.pitch);
 var x=p.x*cy-p.z*sy,z=p.x*sy+p.z*cy,y=p.y*cp-z*sp;z=p.y*sp+z*cp;
-var mobile=window.innerWidth<=700&&!document.body.classList.contains("focus-model"),f=(mobile?850:520)/(view.distance+z+4.5),cx=canvas.width/2,cyy=mobile?canvas.height*.58:canvas.height/2;
+var f=(Math.min(canvas.clientWidth||canvas.width,canvas.clientHeight||canvas.height)*1.8)/(view.distance+z+4.5),cx=(canvas.clientWidth||canvas.width)/2,cyy=(canvas.clientHeight||canvas.height)/2;
 return{x:cx+x*f,y:cyy-y*f,z:z}
 }
 function drawEdges(points,edges,stroke,width){
@@ -256,7 +256,7 @@ ctx.strokeStyle=stroke;ctx.lineWidth=width;
 edges.forEach(function(e){var a=project(points[e[0]]),b=project(points[e[1]]);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()})
 }
 function draw(){
-var dpr=Math.min(window.devicePixelRatio||1,2),w=innerWidth,h=innerHeight;canvas.width=Math.floor(w*dpr);canvas.height=Math.floor(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+var dpr=Math.min(window.devicePixelRatio||1,2),w=geometryViewport.clientWidth,h=geometryViewport.clientHeight;canvas.width=Math.max(1,Math.floor(w*dpr));canvas.height=Math.max(1,Math.floor(h*dpr));ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
 function pts(o){return tetraVertices(o)}drawEdges(cubeVerts,cubeEdges,"rgba(35,119,255,.45)",1);
 var L=pts(objects.L),R=pts(objects.R);drawEdges(L,tetraEdges,"rgba(255,48,48,.9)",1.5);drawEdges(R,tetraEdges,"rgba(49,255,120,.9)",1.5);drawEdges(octVerts,octEdges,"rgba(255,210,26,.95)",2);
 var c=project(V.V(0,0,0));ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(c.x,c.y,3,0,Math.PI*2);ctx.fill();
@@ -264,7 +264,7 @@ if(view.wire){ctx.font="10px ui-monospace,monospace";ctx.fillStyle="rgba(255,255
 if(view.auto)view.yaw+=.003;
 requestAnimationFrame(draw)
 }
-function resize(){canvas.width=innerWidth;canvas.height=innerHeight}
+function resize(){var dpr=Math.min(window.devicePixelRatio||1,2),w=geometryViewport.clientWidth,h=geometryViewport.clientHeight;canvas.width=Math.max(1,Math.floor(w*dpr));canvas.height=Math.max(1,Math.floor(h*dpr))}
 canvas.addEventListener("pointerdown",function(e){view.drag=true;view.lastX=e.clientX;view.lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
 canvas.addEventListener("pointermove",function(e){if(!view.drag)return;view.yaw+=(e.clientX-view.lastX)*.008;view.pitch+=(e.clientY-view.lastY)*.008;view.pitch=Math.max(-1.35,Math.min(1.35,view.pitch));view.lastX=e.clientX;view.lastY=e.clientY});
 canvas.addEventListener("pointerup",function(){view.drag=false});
