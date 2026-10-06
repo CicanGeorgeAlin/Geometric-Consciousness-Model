@@ -211,6 +211,11 @@ document.getElementById("moveL").onclick=()=>{tl.position.x+=.15;evaluateAxiom()
 document.getElementById("moveR").onclick=()=>{tr.position.x-=.15;evaluateAxiom()};
 document.getElementById("twist").onclick=()=>{tr.rotation.z+=Math.PI/12;evaluateAxiom()};
 document.getElementById("resetModel").onclick=resetModel;
+document.getElementById("moveL").addEventListener("click",()=>recordExperiment("Tₗ +X"));
+document.getElementById("moveR").addEventListener("click",()=>recordExperiment("Tᵣ −X"));
+document.getElementById("twist").addEventListener("click",()=>recordExperiment("Tᵣ twist"));
+document.getElementById("resetModel").addEventListener("click",()=>recordExperiment("RESET"));
+
 
 function pgEqualityTest(intersectionPoints){
  const pgVerts=tetraVertices(pg);
@@ -252,6 +257,12 @@ function convexPlanesFromPoints(points){
  return out;
 }
 
+let experimentLog=[];
+function recordExperiment(label){
+ const state=document.getElementById("testState");
+ experimentLog.unshift({time:new Date().toISOString(),label,state:state.getAttribute("data-state")||"UNKNOWN",text:state.innerText});
+ experimentLog=experimentLog.slice(0,8);
+}
 let lastAxiomState="";
 function evaluateAxiom(){
  cube.updateMatrixWorld(true); tl.updateMatrixWorld(true); tr.updateMatrixWorld(true); pg.updateMatrixWorld(true);
