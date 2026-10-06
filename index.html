@@ -252,6 +252,7 @@ function convexPlanesFromPoints(points){
  return out;
 }
 
+let lastAxiomState="";
 function evaluateAxiom(){
  cube.updateMatrixWorld(true); tl.updateMatrixWorld(true); tr.updateMatrixWorld(true); pg.updateMatrixWorld(true);
  const pv=tetraVertices(pg);
@@ -270,7 +271,12 @@ function evaluateAxiom(){
   "PG ≡ (Tₗ ∩ Tᵣ): "+exactStatus
  ];
  state.innerHTML=lines.join("<br>")+"<br>Volume ratio PG/I: "+eq.ratio.toFixed(6)+"<br>Vertex-set distance estimate: "+eq.hausdorff.toFixed(6);
- state.className=(cubeOK&&nonEmpty&&pgIn)?"testGood":"testBad";
+ state.className=(eq.equal)?"testGood":"testBad";
+ const current=(cubeOK&&nonEmpty&&pgIn&&eq.equal)?"MATCH":(cubeOK&&nonEmpty&&pgIn)?"CONTAINED / EQUALITY UNRESOLVED":"FAILED";
+ if(current!==lastAxiomState){
+  lastAxiomState=current;
+  state.setAttribute("data-state",current);
+ }
 }
 function report(){
  root.updateMatrixWorld(true);
