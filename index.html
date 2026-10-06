@@ -273,7 +273,7 @@ let experimentLog=[];
 function exportExperimentReport(){
  const live=classifyGeometry();
  const validation=validationSummary();
- const reproducibility=reproducibilityMetadata();
+ const reproducibility=reproducibilityMetadata();\n const methodology=methodologyRecord();
  const stressSuite=runStressSuite();
  const parameterSweepResults=parameterSweep();\n const sweepConfiguration={parameter:"Tᵣ.position.x",start:-0.9,end:0.9,step:0.15,restoredCanonical:true};\n const parameterTransitions=detectTransitions(parameterSweepResults);\n const refinedTransitions=parameterTransitions.map(refineTransition);\n const sweepSummaryData=sweepSummary(parameterSweepResults,refinedTransitions);\n const stateRegions=buildStateRegions(parameterSweepResults);
  const certificate=buildAxiomCertificate();
@@ -282,7 +282,7 @@ function exportExperimentReport(){
   branch:"v2-development",
   timestamp:new Date().toISOString(),
   canonicalModel:MODEL,
-  liveGeometry:live,validation:validation,reproducibility:reproducibility,stressSuite:stressSuite,parameterSweep:parameterSweepResults,sweepConfiguration:sweepConfiguration,parameterTransitions:parameterTransitions,refinedTransitions:refinedTransitions,sweepSummary:sweepSummaryData,stateRegions:stateRegions,certificate:certificate,experiments:experimentLog
+  liveGeometry:live,validation:validation,reproducibility:reproducibility,methodology:methodology,stressSuite:stressSuite,parameterSweep:parameterSweepResults,sweepConfiguration:sweepConfiguration,parameterTransitions:parameterTransitions,refinedTransitions:refinedTransitions,sweepSummary:sweepSummaryData,stateRegions:stateRegions,certificate:certificate,experiments:experimentLog
  };
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob);
@@ -308,6 +308,17 @@ function recordExperiment(label){
 let lastAxiomState="";
 function generateExperimentID(){
  return "EXP-"+new Date().toISOString().replace(/[-:.TZ]/g,"").slice(0,14)+"-"+Math.random().toString(36).slice(2,7).toUpperCase();
+}
+function methodologyRecord(){
+ return {
+  coordinateSpace:"3D Cartesian Euclidean space",
+  primitiveModel:"axis-aligned cube, two regular tetrahedra, regular octahedron",
+  intersectionMethod:"convex tetrahedron half-space intersection from triple-plane candidates",
+  volumeMethod:"convex-hull tetrahedral decomposition from an interior reference point",
+  containmentRule:"all tested vertices satisfy the relevant convex half-space inequalities",
+  equalityRule:"mutual containment + volume agreement + distance threshold",
+  warning:"Numerical agreement for a finite tolerance is evidence for the current configuration, not a symbolic proof of universal set equality."
+ };
 }
 function reproducibilityMetadata(){
  return {
