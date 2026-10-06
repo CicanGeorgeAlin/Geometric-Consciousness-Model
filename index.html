@@ -105,8 +105,8 @@ document.head.appendChild(formalStyle);
 
 const testPanel=document.createElement('div');
 testPanel.id="testPanel";
-testPanel.innerHTML="<b>AXIOM TESTER</b><br><span id=\"testState\">READY</span>";
-document.body.appendChild(testPanel);
+testPanel.innerHTML="<b>AXIOM TESTER</b><br><span id=\"testState\">READY</span><br><button id=\"exportReport\">EXPORT EXPERIMENT REPORT</button>";
+document.body.appendChild(testPanel);\ndocument.getElementById("exportReport").onclick=exportExperimentReport;
 
 const inspector=document.createElement('div');
 inspector.id='inspector';
@@ -114,7 +114,7 @@ inspector.innerHTML='<b>GEOMETRY INSPECTOR</b><br><span class="dim">Select an ob
 document.body.appendChild(inspector);
 
 const testStyle=document.createElement('style');
-testStyle.textContent='#testPanel{position:fixed;left:18px;top:58px;width:245px;padding:12px 14px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.72);backdrop-filter:blur(6px);font:11px/1.65 monospace;color:#fff;z-index:5}.testGood{color:#fff}.testBad{opacity:.6}@media(max-width:600px){#testPanel{left:10px;top:52px;width:205px;font-size:10px}}';
+testStyle.textContent='#testPanel{position:fixed+'#exportReport{margin-top:8px;padding:6px 8px;background:transparent;border:1px solid rgba(255,255,255,.2);color:#fff;font:9px monospace;cursor:pointer}';left:18px;top:58px;width:245px;padding:12px 14px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.72);backdrop-filter:blur(6px);font:11px/1.65 monospace;color:#fff;z-index:5}.testGood{color:#fff}.testBad{opacity:.6}@media(max-width:600px){#testPanel{left:10px;top:52px;width:205px;font-size:10px}}';
 document.head.appendChild(testStyle);
 
 const inspectorStyle=document.createElement('style');
@@ -270,6 +270,19 @@ function convexPlanesFromPoints(points){
 }
 
 let experimentLog=[];
+function exportExperimentReport(){
+ const payload={
+  model:"CICAN Geometric Consciousness Model V2",
+  branch:"v2-development",
+  timestamp:new Date().toISOString(),
+  canonicalModel:MODEL,
+  experiments:experimentLog
+ };
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a"); a.href=url; a.download="cican-v2-experiment-report.json"; a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
 function snapshotModel(label){
  const snap={
   label,
