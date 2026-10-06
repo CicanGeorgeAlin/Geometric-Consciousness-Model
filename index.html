@@ -292,7 +292,7 @@ return Math.abs(norm-Math.sqrt(3))<tol&&Math.abs((a*norm)-e*Math.sqrt(3)/(2*Math
 var reductionPass=Math.abs(MODEL.pgRadius-a)<tol;
 var cubePass=a<=MODEL.cubeHalf+tol;
 return{pass:paired&&reductionPass&&cubePass,
-coefficientNorms:coefficientPatterns.map(function(c){return Math.sqrt(c[0]*c[0]+c[1]*c[2]+c[2]*c[2])}),
+coefficientNorms:coefficientPatterns.map(function(c){return Math.sqrt(c[0]*c[0]+c[1]*c[1]+c[2]*c[2])}),
 eightPatterns:coefficientPatterns.length,reductionPass:reductionPass,cubePass:cubePass,
 identity:"max over eight sign-linear forms is |x|+|y|+|z|",
 scope:"canonical coefficient algebra only"};
