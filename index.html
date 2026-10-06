@@ -104,6 +104,22 @@ function intersectionVertices(A,B){
  return out;
 }
 function insidePlanes(p,planes){return planes.every(q=>q.distanceToPoint(p)>=-1e-7)}
+function hullVolume(points){
+ if(points.length<4)return 0;
+ let vol=0, eps=1e-8;
+ const center=points.reduce((a,p)=>a.add(p.clone()),new THREE.Vector3()).multiplyScalar(1/points.length);
+ for(let i=0;i<points.length;i++)for(let j=i+1;j<points.length;j++)for(let k=j+1;k<points.length;k++){
+   const a=points[i],b=points[j],d=points[k];
+   let n=new THREE.Vector3().subVectors(b,a).cross(new THREE.Vector3().subVectors(d,a));
+   if(n.lengthSq()<eps)continue;
+   let pos=false,neg=false;
+   for(let m=0;m<points.length;m++){if(m===i||m===j||m===k)continue;const s=n.dot(new THREE.Vector3().subVectors(points[m],a));if(s>eps)pos=true;if(s<-eps)neg=true}
+   if(pos&&neg)continue;
+   if(n.dot(new THREE.Vector3().subVectors(center,a))>0)n.negate();
+   vol+=Math.abs(n.dot(new THREE.Vector3().subVectors(center,a)))/6;
+ }
+ return vol;
+}
 function report(){
  root.updateMatrixWorld(true);
  const pv=tetraVertices(pg), cubeOK=pv.every(insideCube);
@@ -112,6 +128,10 @@ function report(){
  const nonEmpty=iv.length>0;
  const pgInIntersection=pv.every(p=>insidePlanes(p,planes));
  const intersectionVolumeCandidate=iv.length>=4;
+ const intersectionVolume=hullVolume(iv);
+ const pgVertsInsideIntersection=pv.filter(p=>insidePlanes(p,planes)).length;
+ const pgVolume=(4*Math.pow(.72,3))/3;
+ const volumeRatio=intersectionVolume>1e-10?pgVolume/intersectionVolume:0;
  metrics.innerHTML=
   '<b>COMPUTATIONAL CHECKS</b><br>'+
   'PG vertices inside C: <span class="'+(cubeOK?'ok':'pending')+'">'+(cubeOK?'PASS':'FAIL')+'</span><br>'+
@@ -119,6 +139,10 @@ function report(){
   'T<sub>L</sub> ∩ T<sub>R</sub> non-empty: <span class="'+(nonEmpty?'ok':'pending')+'">'+(nonEmpty?'PASS':'FAIL')+'</span><br>'+
   'PG ⊆ (T<sub>L</sub> ∩ T<sub>R</sub>): <span class="'+(pgInIntersection?'ok':'pending')+'">'+(pgInIntersection?'PASS':'FAIL')+'</span><br>'+
   'Intersection 3D candidate: <span class="'+(intersectionVolumeCandidate?'ok':'pending')+'">'+(intersectionVolumeCandidate?'YES':'NO')+'</span><br>'+
+  'Tetrahedron intersection volume: <span class="ok">'+intersectionVolume.toFixed(4)+'</span><br>'+
+  'PG octahedron volume: <span class="ok">'+pgVolume.toFixed(4)+'</span><br>'+
+  'PG vertices inside intersection: <span class="'+(pgVertsInsideIntersection===pv.length?'ok':'pending')+'">'+pgVertsInsideIntersection+'/'+pv.length+'</span><br>'+
+  'PG volume / intersection volume: <span class="pending">'+volumeRatio.toFixed(4)+'</span><br>'+
   'PG ≡ T<sub>L</sub> ∩ T<sub>R</sub>: <span class="pending">NOT PROVEN</span><br>'+
   'Containment PG ⊆ C: <span class="'+(cubeOK?'ok':'pending')+'">'+(cubeOK?'PASS':'FAIL')+'</span>';
  status.textContent=(cubeOK&&nonEmpty)?'PARTIALLY VERIFIED':'REQUIRES REVISION';
