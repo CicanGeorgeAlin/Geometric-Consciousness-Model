@@ -402,18 +402,21 @@ function restoreCanonicalGuard(g){
 }
 function runStressSuite(){
  const guard=canonicalGuard();
+ const canonicalBefore=canonicalStateFingerprint();
  const cases=[];
  const addCase=(name,fn)=>{
-  fn(); tl.updateMatrixWorld(true);tr.updateMatrixWorld(true);pg.updateMatrixWorld(true);
-  const g=classifyGeometry(); cases.push({name,state:g.equality?"MATCH":(g.cubeOK&&g.intersectionVertices>=4&&g.pgInsideIntersection?"CONTAINED / UNRESOLVED":"FAILED"),volumeRatio:g.volumeRatio,distance:g.distance});
+  restoreCanonicalGuard(guard);
+  fn();
+  tl.updateMatrixWorld(true);tr.updateMatrixWorld(true);pg.updateMatrixWorld(true);
+  const g=classifyGeometry();
+  cases.push({name,state:g.equality?"MATCH":(g.cubeOK&&g.intersectionVertices>=4&&g.pgInsideIntersection?"CONTAINED / UNRESOLVED":"FAILED"),volumeRatio:g.volumeRatio,distance:g.distance});
  };
  addCase("canonical",()=>{});
  addCase("Tₗ shifted +0.30X",()=>{tl.position.x+=.3});
- restoreCanonicalGuard(guard);
  addCase("Tᵣ shifted −0.30X",()=>{tr.position.x-=.3});
- tl.position.copy(saved.lp);tl.rotation.copy(saved.lr);tr.position.copy(saved.rp);tr.rotation.copy(saved.rr);
  addCase("Tᵣ twisted +15°",()=>{tr.rotation.z+=Math.PI/12});
- tl.position.copy(saved.lp);tl.rotation.copy(saved.lr);tr.position.copy(saved.rp);tr.rotation.copy(saved.rr);
+ restoreCanonicalGuard(guard);
+ cases.push({name:"canonical restoration",restored:canonicalStateRestored(canonicalBefore)});
  return cases;
 }
 function buildAxiomCertificate(){
