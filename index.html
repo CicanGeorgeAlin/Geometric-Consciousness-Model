@@ -202,7 +202,7 @@ var volumePass=Math.abs(computedVolume-analyticVolume)<1e-7;
 var closed=closedFormIntersectionCertificate();
 var metric=canonicalMetricCertificate();
 var plane=exactCanonicalPlaneCertificate();
-var face=canonicalFaceIncidenceCertificate(volume(octVerts)?octVerts:[]);var pass=intersectionFormPass&&cubeContainmentPass&&volumePass&&closed.pass&&metric.pass&&plane.pass&&face.pass;
+var face=canonicalFaceIncidenceCertificate(intersectionPoints());var pass=intersectionFormPass&&cubeContainmentPass&&volumePass&&closed.pass&&metric.pass&&plane.pass&&face.pass;
 return{
  pass:pass,
  assumptions:{tetraEdge:e,tetraLRotation:MODEL.tetraLRotation,tetraRRotation:MODEL.tetraRRotation,cubeHalf:cube},
