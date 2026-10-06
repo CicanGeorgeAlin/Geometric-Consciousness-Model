@@ -52,16 +52,25 @@ const controls=new THREE.OrbitControls(camera,renderer.domElement);
 controls.enableDamping=true; controls.dampingFactor=.06; controls.enablePan=false; controls.minDistance=3; controls.maxDistance=14;
 
 const root=new THREE.Group(); scene.add(root);
-const C=2, T=2.4;
+// V2 canonical coordinate model.
+// Every visible object is generated from these definitions.
+const MODEL={
+ cubeHalf:1,
+ tetraEdge:2.4,
+ tetraLRotation:new THREE.Euler(0,0,0),
+ tetraRRotation:new THREE.Euler(Math.PI/2,Math.PI/4,0),
+ pgRadius:.72
+};
+const C=2, T=MODEL.tetraEdge;
 const cube=new THREE.Mesh(new THREE.BoxGeometry(C,C,C),new THREE.MeshBasicMaterial({color:0x2377ff,wireframe:true,transparent:true,opacity:.32}));
 root.add(cube);
 
 const tl=new THREE.Mesh(new THREE.TetrahedronGeometry(T,0),new THREE.MeshBasicMaterial({color:0xff3030,wireframe:true,transparent:true,opacity:.75}));
-root.add(tl);
+tl.rotation.copy(MODEL.tetraLRotation); root.add(tl);
 const tr=new THREE.Mesh(new THREE.TetrahedronGeometry(T,0),new THREE.MeshBasicMaterial({color:0x31ff78,wireframe:true,transparent:true,opacity:.75}));
-tr.rotation.set(Math.PI/2,Math.PI/4,0); root.add(tr);
+tr.rotation.copy(MODEL.tetraRRotation); root.add(tr);
 
-const pg=new THREE.Mesh(new THREE.OctahedronGeometry(.72,0),new THREE.MeshBasicMaterial({color:0xffd21a,wireframe:true,transparent:true,opacity:.95}));
+const pg=new THREE.Mesh(new THREE.OctahedronGeometry(MODEL.pgRadius,0),new THREE.MeshBasicMaterial({color:0xffd21a,wireframe:true,transparent:true,opacity:.95}));
 root.add(pg);
 const core=new THREE.Mesh(new THREE.SphereGeometry(.18,20,20),new THREE.MeshBasicMaterial({color:0xffffff}));
 root.add(core);
@@ -132,7 +141,16 @@ function report(){
  const pgVertsInsideIntersection=pv.filter(p=>insidePlanes(p,planes)).length;
  const pgVolume=(4*Math.pow(.72,3))/3;
  const volumeRatio=intersectionVolume>1e-10?pgVolume/intersectionVolume:0;
+ const tetraEdge=T;
+ const tetraVolume=tetraEdge*tetraEdge*tetraEdge/(6*Math.sqrt(2));
+ const cubeVolume=C*C*C;
+ const pgRadius=MODEL.pgRadius;
+ const pgVol=4*pgRadius*pgRadius*pgRadius/3;
  metrics.innerHTML=
+  '<b>CANONICAL MODEL</b><br>'+
+  'C cube side: <span class="ok">'+C.toFixed(2)+'</span> · volume: <span class="ok">'+cubeVolume.toFixed(4)+'</span><br>'+
+  'Tetrahedron edge: <span class="ok">'+tetraEdge.toFixed(2)+'</span> · volume: <span class="ok">'+tetraVolume.toFixed(4)+'</span><br>'+
+  'PG octahedron radius: <span class="ok">'+pgRadius.toFixed(2)+'</span> · volume: <span class="ok">'+pgVol.toFixed(4)+'</span><br><br>'+
   '<b>COMPUTATIONAL CHECKS</b><br>'+
   'PG vertices inside C: <span class="'+(cubeOK?'ok':'pending')+'">'+(cubeOK?'PASS':'FAIL')+'</span><br>'+
   'T<sub>L</sub> ∩ T<sub>R</sub> vertices: <span class="'+(nonEmpty?'ok':'pending')+'">'+iv.length+'</span><br>'+
