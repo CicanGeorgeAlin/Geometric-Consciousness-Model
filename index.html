@@ -275,14 +275,14 @@ function exportExperimentReport(){
  const validation=validationSummary();
  const reproducibility=reproducibilityMetadata();
  const stressSuite=runStressSuite();
- const parameterSweepResults=parameterSweep();\n const parameterTransitions=detectTransitions(parameterSweepResults);\n const refinedTransitions=parameterTransitions.map(refineTransition);\n const sweepSummaryData=sweepSummary(parameterSweepResults,refinedTransitions);\n const stateRegions=buildStateRegions(parameterSweepResults);
+ const parameterSweepResults=parameterSweep();\n const sweepConfiguration={parameter:"Tᵣ.position.x",start:-0.9,end:0.9,step:0.15,restoredCanonical:true};\n const parameterTransitions=detectTransitions(parameterSweepResults);\n const refinedTransitions=parameterTransitions.map(refineTransition);\n const sweepSummaryData=sweepSummary(parameterSweepResults,refinedTransitions);\n const stateRegions=buildStateRegions(parameterSweepResults);
  const certificate=buildAxiomCertificate();
  const payload={
   model:"CICAN Geometric Consciousness Model V2",
   branch:"v2-development",
   timestamp:new Date().toISOString(),
   canonicalModel:MODEL,
-  liveGeometry:live,validation:validation,reproducibility:reproducibility,stressSuite:stressSuite,parameterSweep:parameterSweepResults,parameterTransitions:parameterTransitions,refinedTransitions:refinedTransitions,sweepSummary:sweepSummaryData,stateRegions:stateRegions,certificate:certificate,experiments:experimentLog
+  liveGeometry:live,validation:validation,reproducibility:reproducibility,stressSuite:stressSuite,parameterSweep:parameterSweepResults,sweepConfiguration:sweepConfiguration,parameterTransitions:parameterTransitions,refinedTransitions:refinedTransitions,sweepSummary:sweepSummaryData,stateRegions:stateRegions,certificate:certificate,experiments:experimentLog
  };
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob);
@@ -367,8 +367,14 @@ function detectTransitions(results){
  }
  return transitions;
 }
+function captureTransform(mesh){
+ return {position:mesh.position.clone(),rotation:mesh.rotation.clone(),scale:mesh.scale.clone()};
+}
+function restoreTransform(mesh,s){
+ mesh.position.copy(s.position);mesh.rotation.copy(s.rotation);mesh.scale.copy(s.scale);mesh.updateMatrixWorld(true);
+}
 function parameterSweep(){
- const saved={p:tr.position.x,r:tr.rotation.z};
+ const saved= captureTransform(tr);
  const results=[];
  for(let x=-0.9;x<=0.900001;x+=0.15){
   tr.position.x=x;
@@ -377,8 +383,7 @@ function parameterSweep(){
   const g=classifyGeometry();
   results.push({x:Number(x.toFixed(2)),state:g.equality?"MATCH":(g.cubeOK&&g.intersectionVertices>=4&&g.pgInsideIntersection?"CONTAINED / UNRESOLVED":"FAILED"),volumeRatio:g.volumeRatio,distance:g.distance});
  }
- tr.position.x=saved.p;tr.rotation.z=saved.r;
- tr.updateMatrixWorld(true);
+ restoreTransform(tr,saved);
  return results;
 }
 function runStressSuite(){
