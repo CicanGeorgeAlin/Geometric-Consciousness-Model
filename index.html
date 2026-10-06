@@ -75,6 +75,18 @@ root.add(pg);
 const core=new THREE.Mesh(new THREE.SphereGeometry(.18,20,20),new THREE.MeshBasicMaterial({color:0xffffff}));
 root.add(core);
 
+const historyPanel=document.createElement('div');
+historyPanel.id="historyPanel";
+historyPanel.innerHTML='<b>EXPERIMENT HISTORY</b><div id="historyList"><span class="dim">No experiments recorded.</span></div>';
+document.body.appendChild(historyPanel);
+const historyStyle=document.createElement('style');
+historyStyle.textContent='#historyPanel{position:fixed;left:18px;top:230px;width:245px;max-height:210px;overflow:auto;padding:10px 12px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.78);backdrop-filter:blur(6px);font:9px/1.55 monospace;color:#fff;z-index:5}#historyList{margin-top:7px}.histRow{padding:5px 0;border-top:1px solid rgba(255,255,255,.1)}@media(max-width:600px){#historyPanel{left:10px;top:205px;width:205px;max-height:150px}}';
+document.head.appendChild(historyStyle);
+function renderExperimentHistory(){
+ const list=document.getElementById("historyList");
+ if(!experimentLog.length){list.innerHTML='<span class="dim">No experiments recorded.</span>';return}
+ list.innerHTML=experimentLog.map((x,i)=>'<div class="histRow"><b>#'+(experimentLog.length-i)+'</b> '+x.label+'<br><span class="dim">'+x.state+'</span></div>').join("");
+}
 const formal=document.createElement('div');
 formal.id="formal";
 formal.innerHTML='<b>FORMAL MODEL</b><br><br>'+
@@ -261,7 +273,7 @@ let experimentLog=[];
 function recordExperiment(label){
  const state=document.getElementById("testState");
  experimentLog.unshift({time:new Date().toISOString(),label,state:state.getAttribute("data-state")||"UNKNOWN",text:state.innerText});
- experimentLog=experimentLog.slice(0,8);
+ experimentLog=experimentLog.slice(0,8); renderExperimentHistory();
 }
 let lastAxiomState="";
 function evaluateAxiom(){
