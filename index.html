@@ -97,7 +97,6 @@ function canonicalTetraGeometry(edge){
  g.computeVertexNormals();
  return g;
 }
-const C=2, T=MODEL.tetraEdge;
 const cube=new THREE.Mesh(new THREE.BoxGeometry(C,C,C),new THREE.MeshBasicMaterial({color:0x2377ff,wireframe:true,transparent:true,opacity:.32}));
 root.add(cube);
 
@@ -472,11 +471,11 @@ function buildStateRegions(results){
  let start=results[0].x,current=results[0].state;
  for(let i=1;i<results.length;i++){
   if(results[i].state!==current){
-   regions.push({state:current,from:start,to:results[i-1].x,samples:i});
+   regions.push({state:current,from:start,to:results[i-1].x,samples:Math.round((results[i-1].x-start)/0.15)+1});
    start=results[i].x;current=results[i].state;
   }
  }
- regions.push({state:current,from:start,to:results[results.length-1].x,samples:results.length-(regions.reduce((n,r)=>n+r.samples,0))});
+ regions.push({state:current,from:start,to:results[results.length-1].x,samples:Math.round((results[results.length-1].x-start)/0.15)+1});
  return regions;
 }
 function sweepSummary(results,transitions){
@@ -518,7 +517,7 @@ function parameterSweep(){
  const results=[];
  for(let x=-0.9;x<=0.900001;x+=0.15){
   tr.position.x=x;
-  tr.rotation.z=saved.r;
+  tr.rotation.z=saved.rotation.z;
   tr.updateMatrixWorld(true);tl.updateMatrixWorld(true);pg.updateMatrixWorld(true);
   const g=classifyGeometry();
   results.push({x:Number(x.toFixed(2)),state:g.equality?"MATCH":(g.cubeOK&&g.intersectionVertices>=4&&g.pgInsideIntersection?"CONTAINED / UNRESOLVED":"FAILED"),volumeRatio:g.volumeRatio,distance:g.distance});
@@ -662,7 +661,7 @@ function report(){
 }
 let auto=true, wire=true;
 document.getElementById("rotate").onclick=(e)=>{auto=!auto;e.currentTarget.classList.toggle("active",auto)};
-document.getElementById("wire").onclick=()=>{wire=!wire;[cube,tl,tr,pg].forEach(m=>m.material.wireframe=wire);event.currentTarget.classList.toggle("active",wire)};
+document.getElementById("wire").onclick=(e)=>{wire=!wire;[cube,tl,tr,pg].forEach(m=>m.material.wireframe=wire);e.currentTarget.classList.toggle("active",wire)};
 document.getElementById("reset").onclick=()=>{camera.position.set(4.8,3.6,6.2);controls.target.set(0,0,0);controls.update();root.rotation.set(0,0,0)};
 addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 loading.style.display="none"; report();
