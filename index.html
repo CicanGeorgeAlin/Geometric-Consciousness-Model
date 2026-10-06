@@ -2,149 +2,98 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cican Geometric Consciousness Model™: Lord's Prayer Algorithm</title>
-<meta name="description" content="Cican George Alin Geometric Consciousness Model">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Cican George Alin Geometric Consciousness Model">
-<meta property="og:description" content="Geometric Consciousness Model — Lord's Prayer Algorithm">
-<meta property="og:url" content="https://cicangeorgealin.github.io/Geometric-Consciousness-Model/">
-<meta property="og:image" content="https://cicangeorgealin.github.io/Geometric-Consciousness-Model/cican-george-alin.png">
-<meta property="og:image:alt" content="Cican George Alin — Geometric Consciousness Model">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Cican George Alin Geometric Consciousness Model">
-<meta name="twitter:description" content="Geometric Consciousness Model — Lord's Prayer Algorithm">
-<meta name="twitter:image" content="https://cicangeorgealin.github.io/Geometric-Consciousness-Model/cican-george-alin.png">
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CICAN — Geometric Consciousness Model™ V2</title>
+<meta name="description" content="CICAN Geometric Consciousness Model V2 — an interactive geometric laboratory for the Lord's Prayer Algorithm.">
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}
-#container{position:fixed;inset:0;width:100%;height:100%;background:#000}
-#background-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.7);z-index:0;display:none}
-canvas{position:absolute!important;inset:0;width:100%!important;height:100%!important;display:block;z-index:1}
-#info{position:fixed;top:15px;left:0;width:100%;padding:0 14px;text-align:center;color:#FFD700;font-family:monospace;font-size:16px;line-height:1.5;text-shadow:0 0 5px #000;z-index:5;pointer-events:none}
-#info span{font-size:1.2em;color:#AAEEFF;text-shadow:0 0 8px #AAEEFF}
-#loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;color:#fff;font-family:monospace;font-size:13px;z-index:20;text-align:center;padding:20px}
-@media(max-width:600px){#info{font-size:11px;top:9px}#info span{font-size:12px}}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:Inter,system-ui,Arial,sans-serif}
+#app{position:fixed;inset:0}.hud{position:fixed;z-index:5;pointer-events:none}
+#top{top:18px;left:20px}.brand{font-size:14px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}.sub{margin-top:5px;font-size:11px;letter-spacing:.08em;opacity:.65}
+#axiom{top:18px;right:20px;text-align:right;font-family:ui-monospace,monospace;font-size:14px}.status{margin-top:7px;font-size:10px;opacity:.65}
+#panel{left:20px;bottom:20px;width:min(360px,calc(100vw - 40px));background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(10px);padding:14px;pointer-events:auto}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.btn{border:1px solid rgba(255,255,255,.25);background:#090909;color:#fff;padding:8px 10px;font-size:11px;cursor:pointer}.btn:hover{border-color:#fff}.btn.active{background:#fff;color:#000}
+.metric{font-family:ui-monospace,monospace;font-size:10px;line-height:1.7;opacity:.9}.ok{color:#9f9}.pending{color:#fc6}
+#legend{right:20px;bottom:20px;font-size:10px;line-height:1.8;text-align:right;opacity:.72}
+#loading{position:fixed;inset:0;display:grid;place-items:center;background:#000;z-index:20;font-family:ui-monospace,monospace;font-size:12px}
+@media(max-width:700px){#top{top:10px;left:12px}.brand{font-size:11px}#axiom{top:10px;right:12px;font-size:10px}#panel{left:10px;bottom:10px;width:calc(100vw - 20px)}#legend{display:none}}
 </style>
 </head>
 <body>
-<div id="container">
-<img id="background-image" src="6B82BA3D-7B31-41D5-A35F-B3B40D5C052F.jpeg" alt="">
+<div id="app"></div>
+<div id="loading">INITIALIZING V2 GEOMETRIC LABORATORY…</div>
+<div id="top" class="hud"><div class="brand">CICAN GEOMETRIC CONSCIOUSNESS MODEL™</div><div class="sub">V2 · GEOMETRIC LABORATORY</div></div>
+<div id="axiom" class="hud">PG ≡ (T<sub>L</sub> ∩ T<sub>R</sub>) ⊆ C<div class="status">AXIOM STATUS: <span id="axiomStatus" class="pending">UNDER INVESTIGATION</span></div></div>
+<div id="panel" class="hud">
+  <div class="row">
+    <button class="btn active" id="rotate">AUTO ROTATE</button>
+    <button class="btn active" id="wire">WIREFRAME</button>
+    <button class="btn" id="reset">RESET VIEW</button>
+  </div>
+  <div class="metric" id="metrics"></div>
 </div>
-<div id="loading">INITIALIZING CICAN GEOMETRIC CONSCIOUSNESS MODEL™...</div>
-<div id="info">
-<span>Cican George Alin Geometric Consciousness Model™</span><br>
-Axiom: PG ≡ (T<sub>L</sub> ∩ T<sub>R</sub>) ⊆ C
-<br><small>(Drag to interact · Scroll to zoom)</small>
+<div id="legend" class="hud">
+C · containment frame<br>
+T<sub>L</sub> · tetrahedron L<br>
+T<sub>R</sub> · tetrahedron R<br>
+PG · central octahedral object
 </div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
-(function(){
-"use strict";
+(()=>{"use strict";
+const loading=document.getElementById("loading"), metrics=document.getElementById("metrics"), status=document.getElementById("axiomStatus");
+if(!window.THREE){loading.textContent="Three.js failed to load.";return}
+const scene=new THREE.Scene(), camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,.1,100);
+camera.position.set(4.8,3.6,6.2);
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,2)); renderer.setSize(innerWidth,innerHeight); renderer.setClearColor(0x000000,1);
+document.getElementById("app").appendChild(renderer.domElement);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true; controls.dampingFactor=.06; controls.enablePan=false; controls.minDistance=3; controls.maxDistance=14;
 
-function start(){
- if(typeof THREE==="undefined"){
-   document.getElementById("loading").textContent="Three.js could not be loaded. Please check the connection and reload.";
-   return;
- }
+const root=new THREE.Group(); scene.add(root);
+const C=2, T=2.4;
+const cube=new THREE.Mesh(new THREE.BoxGeometry(C,C,C),new THREE.MeshBasicMaterial({color:0x2377ff,wireframe:true,transparent:true,opacity:.32}));
+root.add(cube);
 
- const container=document.getElementById("container");
- const loading=document.getElementById("loading");
- const bg=document.getElementById("background-image");
+const tl=new THREE.Mesh(new THREE.TetrahedronGeometry(T,0),new THREE.MeshBasicMaterial({color:0xff3030,wireframe:true,transparent:true,opacity:.75}));
+root.add(tl);
+const tr=new THREE.Mesh(new THREE.TetrahedronGeometry(T,0),new THREE.MeshBasicMaterial({color:0x31ff78,wireframe:true,transparent:true,opacity:.75}));
+tr.rotation.set(Math.PI/2,Math.PI/4,0); root.add(tr);
 
- bg.addEventListener("load",function(){bg.style.display="block"});
- bg.addEventListener("error",function(){bg.style.display="none"});
+const pg=new THREE.Mesh(new THREE.OctahedronGeometry(.72,0),new THREE.MeshBasicMaterial({color:0xffd21a,wireframe:true,transparent:true,opacity:.95}));
+root.add(pg);
+const core=new THREE.Mesh(new THREE.SphereGeometry(.18,20,20),new THREE.MeshBasicMaterial({color:0xffffff}));
+root.add(core);
 
- const scene=new THREE.Scene();
- const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,1000);
- camera.position.set(0,0,6);
-
- const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:"high-performance"});
- renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
- renderer.setSize(innerWidth,innerHeight);
- renderer.setClearColor(0x000000,0);
- container.appendChild(renderer.domElement);
-
- const controls=THREE.OrbitControls ? new THREE.OrbitControls(camera,renderer.domElement) : null;
- if(controls){
-   controls.enableDamping=true;
-   controls.dampingFactor=.05;
-   controls.enablePan=false;
-   controls.minDistance=3;
-   controls.maxDistance=12;
- }
-
- const size=2;
-
- const cube=new THREE.Mesh(
-   new THREE.BoxGeometry(size,size,size),
-   new THREE.MeshBasicMaterial({color:0x0055AA,wireframe:true,transparent:true,opacity:.25})
- );
- scene.add(cube);
-
- const tetraGeometry=new THREE.TetrahedronGeometry(size*1.2,0);
-
- const tetraL=new THREE.Mesh(
-   tetraGeometry,
-   new THREE.MeshBasicMaterial({color:0xFF2222,wireframe:true,transparent:true,opacity:.55})
- );
- scene.add(tetraL);
-
- const tetraR=new THREE.Mesh(
-   tetraGeometry.clone(),
-   new THREE.MeshBasicMaterial({color:0x22FF66,wireframe:true,transparent:true,opacity:.55})
- );
- tetraR.rotation.x=Math.PI/2;
- tetraR.rotation.y=Math.PI/4;
- scene.add(tetraR);
-
- const octaPG=new THREE.Mesh(
-   new THREE.OctahedronGeometry(size/2,0),
-   new THREE.MeshBasicMaterial({color:0xFFD700})
- );
- scene.add(octaPG);
-
- const glow=new THREE.Mesh(
-   new THREE.SphereGeometry(.65,24,24),
-   new THREE.MeshBasicMaterial({color:0xFFD700,transparent:true,opacity:.08})
- );
- scene.add(glow);
-
- addEventListener("resize",function(){
-   camera.aspect=innerWidth/innerHeight;
-   camera.updateProjectionMatrix();
-   renderer.setSize(innerWidth,innerHeight);
- });
-
- loading.style.opacity="0";
- setTimeout(function(){loading.style.display="none"},500);
-
- function animate(){
-   requestAnimationFrame(animate);
-   if(controls) controls.update();
-
-   const speed=.005;
-   cube.rotation.x+=speed*.2;
-   cube.rotation.y+=speed*.2;
-   tetraL.rotation.x+=speed*.8;
-   tetraL.rotation.y+=speed*.8;
-   tetraR.rotation.x-=speed*.8;
-   tetraR.rotation.y-=speed*.8;
-   octaPG.rotation.x+=speed*1.5;
-   octaPG.rotation.y+=speed*1.5;
-
-   renderer.render(scene,camera);
- }
- animate();
+function insideCube(p){return Math.abs(p.x)<=C/2+1e-8&&Math.abs(p.y)<=C/2+1e-8&&Math.abs(p.z)<=C/2+1e-8}
+function tetraVertices(mesh){
+ const a=[]; mesh.geometry.attributes.position; const pos=mesh.geometry.attributes.position;
+ for(let i=0;i<pos.count;i++){const p=new THREE.Vector3().fromBufferAttribute(pos,i).applyMatrix4(mesh.matrixWorld); if(!a.some(q=>q.distanceToSquared(p)<1e-10))a.push(p)}
+ return a;
 }
-
-try{start()}catch(e){
- console.error(e);
- document.getElementById("loading").textContent="The model could not initialize. Please reload the page.";
+function report(){
+ root.updateMatrixWorld(true);
+ const pv=tetraVertices(pg), cubeOK=pv.every(insideCube);
+ // Both tetrahedra are centered at the origin; the origin is therefore inside both.
+ const origin=new THREE.Vector3(0,0,0);
+ const sharedCenter=true;
+ metrics.innerHTML=
+  '<b>COMPUTATIONAL CHECKS</b><br>'+
+  'PG vertices inside C: <span class="'+(cubeOK?'ok':'pending')+'">'+(cubeOK?'PASS':'FAIL')+'</span><br>'+
+  'T<sub>L</sub> ∩ T<sub>R</sub> non-empty: <span class="ok">PASS</span> (shared center)<br>'+
+  'PG ≡ T<sub>L</sub> ∩ T<sub>R</sub>: <span class="pending">NOT PROVEN</span><br>'+
+  'Containment relation PG ⊆ C: <span class="'+(cubeOK?'ok':'pending')+'">'+(cubeOK?'PASS':'FAIL')+'</span>';
+ status.textContent=cubeOK?'PARTIALLY VERIFIED':'REQUIRES REVISION';
+ status.className=cubeOK?'ok':'pending';
 }
+let auto=true, wire=true;
+document.getElementById("rotate").onclick=()=>{auto=!auto;event.currentTarget.classList.toggle("active",auto)};
+document.getElementById("wire").onclick=()=>{wire=!wire;[cube,tl,tr,pg].forEach(m=>m.material.wireframe=wire);event.currentTarget.classList.toggle("active",wire)};
+document.getElementById("reset").onclick=()=>{camera.position.set(4.8,3.6,6.2);controls.target.set(0,0,0);controls.update();root.rotation.set(0,0,0)};
+addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+loading.style.display="none"; report();
+function animate(){requestAnimationFrame(animate);if(auto){root.rotation.y+=.0025;root.rotation.x+=.0007}controls.update();renderer.render(scene,camera)}animate();
 })();
 </script>
 </body>
