@@ -271,12 +271,13 @@ function convexPlanesFromPoints(points){
 
 let experimentLog=[];
 function exportExperimentReport(){
+ const live=classifyGeometry();
  const payload={
   model:"CICAN Geometric Consciousness Model V2",
   branch:"v2-development",
   timestamp:new Date().toISOString(),
   canonicalModel:MODEL,
-  experiments:experimentLog
+  liveGeometry:live,experiments:experimentLog
  };
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob);
@@ -300,6 +301,16 @@ function recordExperiment(label){
  experimentLog=experimentLog.slice(0,8); renderExperimentHistory();
 }
 let lastAxiomState="";
+function classifyGeometry(){
+ const pv=tetraVertices(pg);
+ const cubeOK=pv.every(insideCube);
+ const pL=tetraPlanes(tl),pR=tetraPlanes(tr);
+ const iv=intersectionVertices(pL,pR);
+ const eq=pgEqualityTest(iv);
+ const interVol=iv.length>=4?hullVolume(iv):0;
+ const pgVol=4*Math.pow(MODEL.pgRadius,3)/3;
+ return {cubeOK,intersectionVertices:iv.length,intersectionVolume:interVol,pgVolume:pgVol,volumeRatio:interVol?pgVol/interVol:0,equality:!!eq.equal,pgInsideIntersection:!!eq.pgInside,intersectionInsidePG:!!eq.interInsidePG,distance:typeof eq.hausdorff==="number"?eq.hausdorff:null};
+}
 function evaluateAxiom(){
  cube.updateMatrixWorld(true); tl.updateMatrixWorld(true); tr.updateMatrixWorld(true); pg.updateMatrixWorld(true);
  const pv=tetraVertices(pg);
