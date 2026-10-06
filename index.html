@@ -273,6 +273,7 @@ let experimentLog=[];
 function exportExperimentReport(){
  const live=classifyGeometry();
  const validation=validationSummary();
+ const reproducibility=reproducibilityMetadata();
  const stressSuite=runStressSuite();
  const certificate=buildAxiomCertificate();
  const payload={
@@ -280,7 +281,7 @@ function exportExperimentReport(){
   branch:"v2-development",
   timestamp:new Date().toISOString(),
   canonicalModel:MODEL,
-  liveGeometry:live,validation:validation,stressSuite:stressSuite,certificate:certificate,experiments:experimentLog
+  liveGeometry:live,validation:validation,reproducibility:reproducibility,stressSuite:stressSuite,certificate:certificate,experiments:experimentLog
  };
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob);
@@ -304,6 +305,19 @@ function recordExperiment(label){
  experimentLog=experimentLog.slice(0,8); renderExperimentHistory();
 }
 let lastAxiomState="";
+function generateExperimentID(){
+ return "EXP-"+new Date().toISOString().replace(/[-:.TZ]/g,"").slice(0,14)+"-"+Math.random().toString(36).slice(2,7).toUpperCase();
+}
+function reproducibilityMetadata(){
+ return {
+  experimentID:generateExperimentID(),
+  modelVersion:"V2",
+  coordinateModel:"canonical",
+  tolerance:{containment:1e-8,equalityVolume:1e-6,distance:1e-5},
+  geometryEngine:"convex half-space intersection + convex hull volume",
+  note:"Results are numerical computations for the current model configuration."
+ };
+}
 function runStressSuite(){
  const saved={lp:tl.position.clone(),lr:tl.rotation.clone(),rp:tr.position.clone(),rr:tr.rotation.clone()};
  const cases=[];
