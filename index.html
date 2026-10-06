@@ -273,12 +273,13 @@ let experimentLog=[];
 function exportExperimentReport(){
  const live=classifyGeometry();
  const validation=validationSummary();
+ const certificate=buildAxiomCertificate();
  const payload={
   model:"CICAN Geometric Consciousness Model V2",
   branch:"v2-development",
   timestamp:new Date().toISOString(),
   canonicalModel:MODEL,
-  liveGeometry:live,validation:validation,experiments:experimentLog
+  liveGeometry:live,validation:validation,certificate:certificate,experiments:experimentLog
  };
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob);
@@ -302,6 +303,21 @@ function recordExperiment(label){
  experimentLog=experimentLog.slice(0,8); renderExperimentHistory();
 }
 let lastAxiomState="";
+function buildAxiomCertificate(){
+ const v=validationSummary();
+ const status=v.allPassed?"NUMERICAL MATCH":"NOT ESTABLISHED";
+ return {
+  title:"CICAN V2 AXIOM TEST CERTIFICATE",
+  generatedAt:new Date().toISOString(),
+  statement:"PG ≡ (Tₗ ∩ Tᵣ)",
+  status,
+  passed:v.passed,
+  total:v.total,
+  interpretation:v.allPassed?
+   "All implemented numerical checks pass for the current configuration; this is computational evidence, not a general mathematical proof.":
+   "The implemented checks do not establish set equality for the current configuration."
+ };
+}
 function validationSummary(){
  const g=classifyGeometry();
  const checks=[
