@@ -222,11 +222,19 @@ function pgEqualityTest(intersectionPoints){
  const iv=hullVolume(intersectionPoints);
  const pv=4*Math.pow(MODEL.pgRadius,3)/3;
  const ratio=iv>1e-10?pv/iv:0;
- const equal=pgInside&&interInsidePG&&Math.abs(ratio-1)<1e-6;
- return {equal,pgInside,interInsidePG,ratio};
+ const pgSample=pgVerts;
+ const intersectionSample=intersectionPoints;
+ const hd=hausdorffEstimate(pgSample,intersectionSample);
+ const equal=pgInside&&interInsidePG&&Math.abs(ratio-1)<1e-6&&hd<1e-5;
+ return {equal,pgInside,interInsidePG,ratio,hausdorff:hd};
 }
 function pointInsidePG(p){
  return Math.abs(p.x)+Math.abs(p.y)+Math.abs(p.z)<=MODEL.pgRadius+1e-8;
+}
+function hausdorffEstimate(A,B){
+ if(!A.length||!B.length)return Infinity;
+ const directed=(X,Y)=>Math.max(...X.map(p=>Math.min(...Y.map(q=>p.distanceTo(q)))));
+ return Math.max(directed(A,B),directed(B,A));
 }
 function convexPlanesFromPoints(points){
  const out=[];
@@ -261,7 +269,7 @@ function evaluateAxiom(){
   "PG ⊆ (Tₗ ∩ Tᵣ): "+(pgIn?"YES":"NO"),
   "PG ≡ (Tₗ ∩ Tᵣ): "+exactStatus
  ];
- state.innerHTML=lines.join("<br>")+"<br>Volume ratio PG/I: "+eq.ratio.toFixed(6);
+ state.innerHTML=lines.join("<br>")+"<br>Volume ratio PG/I: "+eq.ratio.toFixed(6)+"<br>Vertex-set distance estimate: "+eq.hausdorff.toFixed(6);
  state.className=(cubeOK&&nonEmpty&&pgIn)?"testGood":"testBad";
 }
 function report(){
