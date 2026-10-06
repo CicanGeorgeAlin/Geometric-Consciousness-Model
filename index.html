@@ -212,6 +212,38 @@ document.getElementById("moveR").onclick=()=>{tr.position.x-=.15;evaluateAxiom()
 document.getElementById("twist").onclick=()=>{tr.rotation.z+=Math.PI/12;evaluateAxiom()};
 document.getElementById("resetModel").onclick=resetModel;
 
+function pgEqualityTest(intersectionPoints){
+ const pgVerts=tetraVertices(pg);
+ if(intersectionPoints.length<4) return {equal:false,reason:"Intersection is not a 3D solid."};
+ const planes=convexPlanesFromPoints(intersectionPoints);
+ if(!planes.length) return {equal:false,reason:"Could not construct intersection boundary."};
+ const pgInside=pgVerts.every(p=>insidePlanes(p,planes));
+ const interInsidePG=intersectionPoints.every(p=>pointInsidePG(p));
+ const iv=hullVolume(intersectionPoints);
+ const pv=4*Math.pow(MODEL.pgRadius,3)/3;
+ const ratio=iv>1e-10?pv/iv:0;
+ const equal=pgInside&&interInsidePG&&Math.abs(ratio-1)<1e-6;
+ return {equal,pgInside,interInsidePG,ratio};
+}
+function pointInsidePG(p){
+ return Math.abs(p.x)+Math.abs(p.y)+Math.abs(p.z)<=MODEL.pgRadius+1e-8;
+}
+function convexPlanesFromPoints(points){
+ const out=[];
+ for(let i=0;i<points.length;i++)for(let j=i+1;j<points.length;j++)for(let k=j+1;k<points.length;k++){
+  const a=points[i],b=points[j],d=points[k];
+  const n=new THREE.Vector3().subVectors(b,a).cross(new THREE.Vector3().subVectors(d,a));
+  if(n.lengthSq()<1e-12)continue;
+  n.normalize(); const q=-n.dot(a);
+  let pos=false,neg=false;
+  for(const p of points){const s=n.dot(p)+q;if(s>1e-7)pos=true;if(s<-1e-7)neg=true;}
+  if(pos&&neg)continue;
+  if(pos){n.negate();q=-q;}
+  if(!out.some(x=>Math.abs(x.n.dot(n)-1)<1e-7&&Math.abs(x.q-q)<1e-7))out.push({n:n.clone(),q});
+ }
+ return out;
+}
+
 function evaluateAxiom(){
  cube.updateMatrixWorld(true); tl.updateMatrixWorld(true); tr.updateMatrixWorld(true); pg.updateMatrixWorld(true);
  const pv=tetraVertices(pg);
@@ -220,14 +252,15 @@ function evaluateAxiom(){
  const iv=intersectionVertices(planesL,planesR);
  const nonEmpty=iv.length>=4;
  const pgIn= pv.every(p=>insidePlanes(p,[...planesL,...planesR]));
+ const eq=pgEqualityTest(iv);
  const state=document.getElementById("testState");
  const lines=[
   "PG ⊆ C: "+(cubeOK?"YES":"NO"),
   "Tₗ ∩ Tᵣ: "+(nonEmpty?"3D NON-EMPTY":"EMPTY / DEGENERATE"),
   "PG ⊆ (Tₗ ∩ Tᵣ): "+(pgIn?"YES":"NO"),
-  "PG ≡ (Tₗ ∩ Tᵣ): NOT PROVEN"
+  "PG ≡ (Tₗ ∩ Tᵣ): "+(eq.equal?"MATCH":"NOT EQUAL / NOT PROVEN")
  ];
- state.innerHTML=lines.join("<br>");
+ state.innerHTML=lines.join("<br>")+"<br>Volume ratio PG/I: "+eq.ratio.toFixed(6);
  state.className=(cubeOK&&nonEmpty&&pgIn)?"testGood":"testBad";
 }
 function report(){
