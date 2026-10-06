@@ -57,19 +57,42 @@ const root=new THREE.Group(); scene.add(root);
 const MODEL={
  version:"2.33",
  cubeHalf:1,
- tetraEdge:2.4,
+ tetraEdge:2.4,\n tetraDefinition:"regular tetrahedron, explicit edge-length coordinates",
  tetraLRotation:[0,0,0],
  tetraRRotation:[Math.PI/2,Math.PI/4,0],
  pgRadius:.72
 };
 function modelEuler(a){return new THREE.Euler(a[0],a[1],a[2]);}
 const C=2, T=MODEL.tetraEdge;
+// Explicit regular-tetrahedron construction.
+// For a regular tetrahedron of edge length e centered at the origin,
+// the vertices are (±a,±a,±a) with an even number of minus signs,
+// where a=e/(2√2). This keeps the mathematical model independent
+// of Three.js' TetrahedronGeometry radius convention.
+function canonicalTetraGeometry(edge){
+ const a=edge/(2*Math.sqrt(2));
+ const v=[
+  [ a, a, a],
+  [ a,-a,-a],
+  [-a, a,-a],
+  [-a,-a, a]
+ ];
+ const positions=new Float32Array(v.flat());
+ const indices=[0,2,1, 0,1,3, 0,3,2, 1,2,3];
+ const g=new THREE.BufferGeometry();
+ g.setAttribute("position",new THREE.BufferAttribute(positions,3));
+ g.setIndex(indices);
+ g.computeVertexNormals();
+ return g;
+}
+const C=2, T=MODEL.tetraEdge;
 const cube=new THREE.Mesh(new THREE.BoxGeometry(C,C,C),new THREE.MeshBasicMaterial({color:0x2377ff,wireframe:true,transparent:true,opacity:.32}));
 root.add(cube);
 
-const tl=new THREE.Mesh(new THREE.TetrahedronGeometry(T,0),new THREE.MeshBasicMaterial({color:0xff3030,wireframe:true,transparent:true,opacity:.75}));
+const tetraGeometry=canonicalTetraGeometry(T);
+const tl=new THREE.Mesh(tetraGeometry,new THREE.MeshBasicMaterial({color:0xff3030,wireframe:true,transparent:true,opacity:.75}));
 tl.rotation.copy(modelEuler(MODEL.tetraLRotation)); root.add(tl);
-const tr=new THREE.Mesh(new THREE.TetrahedronGeometry(T,0),new THREE.MeshBasicMaterial({color:0x31ff78,wireframe:true,transparent:true,opacity:.75}));
+const tr=new THREE.Mesh(tetraGeometry.clone(),new THREE.MeshBasicMaterial({color:0x31ff78,wireframe:true,transparent:true,opacity:.75}));
 tr.rotation.copy(modelEuler(MODEL.tetraRRotation)); root.add(tr);
 
 const pg=new THREE.Mesh(new THREE.OctahedronGeometry(MODEL.pgRadius,0),new THREE.MeshBasicMaterial({color:0xffd21a,wireframe:true,transparent:true,opacity:.95}));
@@ -130,7 +153,7 @@ inspector.innerHTML='<b>GEOMETRY INSPECTOR</b><br><span class="dim">Select an ob
 document.body.appendChild(inspector);
 
 const testStyle=document.createElement('style');
-testStyle.textContent='#testPanel{position:fixed+'#exportReport{margin-top:8px;padding:6px 8px;background:transparent;border:1px solid rgba(255,255,255,.2);color:#fff;font:9px monospace;cursor:pointer}';left:18px;top:58px;width:245px;padding:12px 14px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.72);backdrop-filter:blur(6px);font:11px/1.65 monospace;color:#fff;z-index:5}.testGood{color:#fff}.testBad{opacity:.6}@media(max-width:600px){#testPanel{left:10px;top:52px;width:205px;font-size:10px}}';
+testStyle.textContent='#testPanel{position:fixed;left:18px;top:58px;width:245px;padding:12px 14px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.72);backdrop-filter:blur(6px);font:11px/1.65 monospace;color:#fff;z-index:5}.testGood{color:#fff}.testBad{opacity:.6}#exportReport{margin-top:8px;padding:6px 8px;background:transparent;border:1px solid rgba(255,255,255,.2);color:#fff;font:9px monospace;cursor:pointer}@media(max-width:600px){#testPanel{left:10px;top:52px;width:205px;font-size:10px}}';
 document.head.appendChild(testStyle);
 
 const inspectorStyle=document.createElement('style');
@@ -587,7 +610,7 @@ function report(){
  const intersectionVolumeCandidate=iv.length>=4;
  const intersectionVolume=hullVolume(iv);
  const pgVertsInsideIntersection=pv.filter(p=>insidePlanes(p,planes)).length;
- const pgVolume=(4*Math.pow(.72,3))/3;
+ const pgVolume=(4*Math.pow(MODEL.pgRadius,3))/3;
  const volumeRatio=intersectionVolume>1e-10?pgVolume/intersectionVolume:0;
  const tetraEdge=T;
  const tetraVolume=tetraEdge*tetraEdge*tetraEdge/(6*Math.sqrt(2));
