@@ -328,6 +328,7 @@ function experimentManifest(){
  return {
   schemaVersion:"1.0",
   modelVersion:"V2",
+  modelFingerprint:canonicalModelFingerprint(),
   canonicalParameters:{
    cubeHalf:MODEL.cubeHalf,
    tetraEdge:MODEL.tetraEdge,
@@ -474,6 +475,7 @@ function buildAxiomCertificate(){
  const status=v.allPassed?"NUMERICAL MATCH":"NOT ESTABLISHED";
  return {
   title:"CICAN V2 AXIOM TEST CERTIFICATE",
+  modelFingerprint:canonicalModelFingerprint(),
   generatedAt:new Date().toISOString(),
   statement:"PG ≡ (Tₗ ∩ Tᵣ)",
   status,
