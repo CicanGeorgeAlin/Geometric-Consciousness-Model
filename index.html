@@ -386,8 +386,22 @@ function parameterSweep(){
  restoreTransform(tr,saved);
  return results;
 }
+function canonicalGuard(){
+ const saved={tl:captureTransform(tl),tr:captureTransform(tr),pg:captureTransform(pg)};
+ const baseline=JSON.stringify({
+  tl:saved.tl.position.toArray().concat(saved.tl.rotation.toArray()),
+  tr:saved.tr.position.toArray().concat(saved.tr.rotation.toArray()),
+  pg:saved.pg.position.toArray().concat(saved.pg.rotation.toArray())
+ });
+ return {saved,baseline};
+}
+function restoreCanonicalGuard(g){
+ restoreTransform(tl,g.saved.tl);
+ restoreTransform(tr,g.saved.tr);
+ restoreTransform(pg,g.saved.pg);
+}
 function runStressSuite(){
- const saved={lp:tl.position.clone(),lr:tl.rotation.clone(),rp:tr.position.clone(),rr:tr.rotation.clone()};
+ const guard=canonicalGuard();
  const cases=[];
  const addCase=(name,fn)=>{
   fn(); tl.updateMatrixWorld(true);tr.updateMatrixWorld(true);pg.updateMatrixWorld(true);
@@ -395,7 +409,7 @@ function runStressSuite(){
  };
  addCase("canonical",()=>{});
  addCase("Tₗ shifted +0.30X",()=>{tl.position.x+=.3});
- tl.position.copy(saved.lp);tl.rotation.copy(saved.lr);tr.position.copy(saved.rp);tr.rotation.copy(saved.rr);
+ restoreCanonicalGuard(guard);
  addCase("Tᵣ shifted −0.30X",()=>{tr.position.x-=.3});
  tl.position.copy(saved.lp);tl.rotation.copy(saved.lr);tr.position.copy(saved.rp);tr.rotation.copy(saved.rr);
  addCase("Tᵣ twisted +15°",()=>{tr.rotation.z+=Math.PI/12});
