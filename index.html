@@ -275,13 +275,14 @@ function exportExperimentReport(){
  const validation=validationSummary();
  const reproducibility=reproducibilityMetadata();
  const stressSuite=runStressSuite();
+ const parameterSweepResults=parameterSweep();
  const certificate=buildAxiomCertificate();
  const payload={
   model:"CICAN Geometric Consciousness Model V2",
   branch:"v2-development",
   timestamp:new Date().toISOString(),
   canonicalModel:MODEL,
-  liveGeometry:live,validation:validation,reproducibility:reproducibility,stressSuite:stressSuite,certificate:certificate,experiments:experimentLog
+  liveGeometry:live,validation:validation,reproducibility:reproducibility,stressSuite:stressSuite,parameterSweep:parameterSweepResults,certificate:certificate,experiments:experimentLog
  };
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob);
@@ -317,6 +318,20 @@ function reproducibilityMetadata(){
   geometryEngine:"convex half-space intersection + convex hull volume",
   note:"Results are numerical computations for the current model configuration."
  };
+}
+function parameterSweep(){
+ const saved={p:tr.position.x,r:tr.rotation.z};
+ const results=[];
+ for(let x=-0.9;x<=0.900001;x+=0.15){
+  tr.position.x=x;
+  tr.rotation.z=saved.r;
+  tr.updateMatrixWorld(true);tl.updateMatrixWorld(true);pg.updateMatrixWorld(true);
+  const g=classifyGeometry();
+  results.push({x:Number(x.toFixed(2)),state:g.equality?"MATCH":(g.cubeOK&&g.intersectionVertices>=4&&g.pgInsideIntersection?"CONTAINED / UNRESOLVED":"FAILED"),volumeRatio:g.volumeRatio,distance:g.distance});
+ }
+ tr.position.x=saved.p;tr.rotation.z=saved.r;
+ tr.updateMatrixWorld(true);
+ return results;
 }
 function runStressSuite(){
  const saved={lp:tl.position.clone(),lr:tl.rotation.clone(),rp:tr.position.clone(),rr:tr.rotation.clone()};
