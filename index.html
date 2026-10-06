@@ -253,12 +253,13 @@ function evaluateAxiom(){
  const nonEmpty=iv.length>=4;
  const pgIn= pv.every(p=>insidePlanes(p,[...planesL,...planesR]));
  const eq=pgEqualityTest(iv);
+ const exactStatus=eq.equal?"GEOMETRIC SETS MATCH":"SET EQUALITY NOT ESTABLISHED";
  const state=document.getElementById("testState");
  const lines=[
   "PG ⊆ C: "+(cubeOK?"YES":"NO"),
   "Tₗ ∩ Tᵣ: "+(nonEmpty?"3D NON-EMPTY":"EMPTY / DEGENERATE"),
   "PG ⊆ (Tₗ ∩ Tᵣ): "+(pgIn?"YES":"NO"),
-  "PG ≡ (Tₗ ∩ Tᵣ): "+(eq.equal?"MATCH":"NOT EQUAL / NOT PROVEN")
+  "PG ≡ (Tₗ ∩ Tᵣ): "+exactStatus
  ];
  state.innerHTML=lines.join("<br>")+"<br>Volume ratio PG/I: "+eq.ratio.toFixed(6);
  state.className=(cubeOK&&nonEmpty&&pgIn)?"testGood":"testBad";
