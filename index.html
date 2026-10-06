@@ -75,10 +75,19 @@ root.add(pg);
 const core=new THREE.Mesh(new THREE.SphereGeometry(.18,20,20),new THREE.MeshBasicMaterial({color:0xffffff}));
 root.add(core);
 
+const testPanel=document.createElement('div');
+testPanel.id="testPanel";
+testPanel.innerHTML="<b>AXIOM TESTER</b><br><span id=\"testState\">READY</span>";
+document.body.appendChild(testPanel);
+
 const inspector=document.createElement('div');
 inspector.id='inspector';
 inspector.innerHTML='<b>GEOMETRY INSPECTOR</b><br><span class="dim">Select an object below</span>';
 document.body.appendChild(inspector);
+
+const testStyle=document.createElement('style');
+testStyle.textContent='#testPanel{position:fixed;left:18px;top:58px;width:245px;padding:12px 14px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.72);backdrop-filter:blur(6px);font:11px/1.65 monospace;color:#fff;z-index:5}.testGood{color:#fff}.testBad{opacity:.6}@media(max-width:600px){#testPanel{left:10px;top:52px;width:205px;font-size:10px}}';
+document.head.appendChild(testStyle);
 
 const inspectorStyle=document.createElement('style');
 inspectorStyle.textContent='#inspector{position:fixed;right:18px;top:58px;width:245px;padding:12px 14px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.72);backdrop-filter:blur(6px);font:11px/1.65 monospace;color:#fff;letter-spacing:.03em;z-index:5}.dim{opacity:.55}.inspectBtn{display:block;width:100%;margin:5px 0;padding:6px 8px;background:transparent;border:1px solid rgba(255,255,255,.16);color:#fff;text-align:left;font:10px monospace;cursor:pointer}.inspectBtn:hover,.inspectBtn.active{border-color:#fff}@media(max-width:600px){#inspector{right:10px;top:52px;width:205px;font-size:10px}}';
@@ -164,6 +173,24 @@ function hullVolume(points){
  }
  return vol;
 }
+function evaluateAxiom(){
+ cube.updateMatrixWorld(true); tl.updateMatrixWorld(true); tr.updateMatrixWorld(true); pg.updateMatrixWorld(true);
+ const pv=tetraVertices(pg);
+ const cubeOK=pv.every(insideCube);
+ const planesL=tetraPlanes(tl), planesR=tetraPlanes(tr);
+ const iv=intersectionVertices(planesL,planesR);
+ const nonEmpty=iv.length>=4;
+ const pgIn= pv.every(p=>insidePlanes(p,[...planesL,...planesR]));
+ const state=document.getElementById("testState");
+ const lines=[
+  "PG ⊆ C: "+(cubeOK?"YES":"NO"),
+  "Tₗ ∩ Tᵣ: "+(nonEmpty?"3D NON-EMPTY":"EMPTY / DEGENERATE"),
+  "PG ⊆ (Tₗ ∩ Tᵣ): "+(pgIn?"YES":"NO"),
+  "PG ≡ (Tₗ ∩ Tᵣ): NOT PROVEN"
+ ];
+ state.innerHTML=lines.join("<br>");
+ state.className=(cubeOK&&nonEmpty&&pgIn)?"testGood":"testBad";
+}
 function report(){
  root.updateMatrixWorld(true);
  const pv=tetraVertices(pg), cubeOK=pv.every(insideCube);
@@ -206,7 +233,7 @@ document.getElementById("rotate").onclick=()=>{auto=!auto;event.currentTarget.cl
 document.getElementById("wire").onclick=()=>{wire=!wire;[cube,tl,tr,pg].forEach(m=>m.material.wireframe=wire);event.currentTarget.classList.toggle("active",wire)};
 document.getElementById("reset").onclick=()=>{camera.position.set(4.8,3.6,6.2);controls.target.set(0,0,0);controls.update();root.rotation.set(0,0,0)};
 addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
-loading.style.display="none"; report();
+loading.style.display="none"; report();\nevaluateAxiom();
 function animate(){requestAnimationFrame(animate);if(auto){root.rotation.y+=.0025;root.rotation.x+=.0007}controls.update();renderer.render(scene,camera)}animate();
 })();
 </script>
