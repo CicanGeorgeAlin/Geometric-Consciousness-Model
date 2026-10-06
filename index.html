@@ -232,19 +232,19 @@ var unique=expected.filter(function(p,i){return expected.every(function(q,j){ret
 return {pass:inside&&boundary&&unique,expectedVertices:6,insideAllHalfspaces:inside,eachVertexOnBoundary:boundary,uniqueVertices:unique,method:"independent closed-form vertices tested directly against live tetrahedron inward half-spaces"};
 }
 function polytopeCertificate(points,expected){
-if(points.length!==expected.length)return{pass:false,reason:"vertex-count mismatch"};
-var max=0;for(var i=0;i<expected.length;i++){var best=Infinity;for(var j=0;j<points.length;j++)best=Math.min(best,dist(points[j],expected[i]));max=Math.max(max,best);}
+if(!Array.isArray(points)||points.length!==expected.length)return{pass:false,reason:"vertex-count mismatch"};
+var max=0;for(var i=0;i<expected.length;i++){var best=Infinity;for(var j=0;j<points.length;j++)best=Math.min(best,V.dist(points[j],expected[i]));max=Math.max(max,best);}
 return{pass:max<1e-7,maxNearestError:max,expectedVertices:expected.length,actualVertices:points.length};
 }
 function canonicalFacetCertificate(iv){
 var expected=octVerts, faces=[];
 for(var i=0;i<expected.length;i++)for(var j=i+1;j<expected.length;j++)for(var k=j+1;k<expected.length;k++){
-var p=planeFrom3(expected[i],expected[j],expected[k]), ok=true;
-for(var q=0;q<expected.length;q++)if(i!==q&&j!==q&&k!==q&&Math.abs(dot(p.n,expected[q])+p.d)<1e-7)ok=false;
+var p=planeFrom3(expected[i],expected[j],expected[k],V.V(0,0,0)), ok=true;
+for(var q=0;q<expected.length;q++)if(i!==q&&j!==q&&k!==q&&Math.abs(planeValue(p,expected[q]))<1e-7)ok=false;
 if(ok)faces.push(p);
 }
 var matched=0;
-faces.forEach(function(f){var hits=iv.filter(function(p){return Math.abs(dot(f.n,p)+f.d)<1e-7;});if(hits.length>=3)matched++;});
+faces.forEach(function(f){var hits=iv.filter(function(p){return Math.abs(planeValue(f,p))<1e-7;});if(hits.length>=3)matched++;});
 return{pass:faces.length===8&&matched===8,expectedFacets:faces.length,matchedFacets:matched};
 }
 function analyticCanonical(){
@@ -253,8 +253,23 @@ return {edge:e,octaRadius:r,octaVolume:v,cubeHalf:MODEL.cubeHalf,insideCube:r<=M
 formulaRadius:"e/(2√2)",formulaVolume:"4r³/3"};
 }
 function certificateDiff(g,c){
-return {vertexCountError:g.iv.length-c.expectedVertices,volumeError:g.ivol-c.analyticVolume,
-radiusError:MODEL.pgRadius-c.analyticRadius,distance:g.distance};
+return {vertexCountError:g.intersectionVertices-c.expectedVertices,volumeError:g.intersectionVolume-c.analyticVolume,
+radiusError:MODEL.pgRadius-c.analyticRadius,distance:g.distanceEstimate};
+}
+function verificationManifest(){
+return{
+ schemaVersion:"1.0",
+ levels:[
+  {level:"SYMBOLIC_IDENTITY",scope:"closed-form algebraic identities encoded and numerically checked at the canonical parameter values",status:"SUPPORTED",notAFormalProof:true},
+  {level:"ANALYTICAL_DERIVATION",scope:"canonical half-space reduction, PG definition, cube containment",status:"SUPPORTED",notAFormalProof:true},
+  {level:"NUMERICAL_CERTIFICATE",scope:"finite-precision plane, vertex, volume and half-space checks",status:"PASS",tolerance:1e-7},
+  {level:"EXPERIMENTAL",scope:"perturbation suite, parameter sweeps and phase map",status:"AVAILABLE"},
+  {level:"HYPOTHESIS",scope:"consciousness/prayer interpretation",status:"UNPROVEN"}
+ ],
+ epistemicBoundary:"The geometric equality concerns the tested canonical construction only. It does not prove a universal theory of consciousness, prayer, or the Lord’s Prayer Algorithm.",
+ finitePrecision:"All floating-point certificates use explicit tolerances; exact symbolic proof is not claimed.",
+ modelFingerprint:fingerprint()
+};
 }
 function phaseMap(){
 var xs=[],zs=[],baseL={t:clone(objects.L.t),r:clone(objects.L.r)},baseR={t:clone(objects.R.t),r:clone(objects.R.r)};
@@ -297,7 +312,7 @@ return{
 }
 }
 function exportExperiment(){
-var payload=experimentSnapshot();payload.perturbationSuite=perturbationSuite();payload.parameterSweeps={translationR:parameterSweep("R.x",-0.9,0.9,0.15),rotationR:parameterSweep("R.z",-Math.PI/2,Math.PI/2,Math.PI/24)};payload.transitions={translationR:sweepTransitions(payload.parameterSweeps.translationR),rotationR:sweepTransitions(payload.parameterSweeps.rotationR)};payload.phaseMap=phaseMap();var ac=analyticCanonical();payload.analyticCanonical=ac;payload.certificateErrors=certificateDiff(payload.classification,{expectedVertices:6,analyticVolume:ac.octaVolume,analyticRadius:ac.octaRadius});payload.polytopeCertificate=polytopeCertificate(payload.classification.intersectionVertices,octVerts);payload.facetCertificate=canonicalFacetCertificate(payload.classification.intersectionVertices);payload.independentHalfspaceCertificate=independentHalfspaceCertificate();payload.exactCanonicalPlaneCertificate=exactCanonicalPlaneCertificate();payload.canonicalMetricCertificate=canonicalMetricCertificate();payload.closedFormIntersectionCertificate=closedFormIntersectionCertificate();payload.canonicalDerivationCertificate=canonicalDerivationCertificate();payload.canonicalSymbolicIdentityCertificate=canonicalSymbolicIdentityCertificate();
+var payload=experimentSnapshot();payload.perturbationSuite=perturbationSuite();payload.parameterSweeps={translationR:parameterSweep("R.x",-0.9,0.9,0.15),rotationR:parameterSweep("R.z",-Math.PI/2,Math.PI/2,Math.PI/24)};payload.transitions={translationR:sweepTransitions(payload.parameterSweeps.translationR),rotationR:sweepTransitions(payload.parameterSweeps.rotationR)};payload.phaseMap=phaseMap();var ac=analyticCanonical();payload.analyticCanonical=ac;payload.certificateErrors=certificateDiff(payload.classification,{expectedVertices:6,analyticVolume:ac.octaVolume,analyticRadius:ac.octaRadius});payload.polytopeCertificate=polytopeCertificate(payload.classification.intersectionVertices,octVerts);payload.facetCertificate=canonicalFacetCertificate(payload.classification.intersectionVertices);payload.independentHalfspaceCertificate=independentHalfspaceCertificate();payload.exactCanonicalPlaneCertificate=exactCanonicalPlaneCertificate();payload.canonicalMetricCertificate=canonicalMetricCertificate();payload.closedFormIntersectionCertificate=closedFormIntersectionCertificate();payload.canonicalDerivationCertificate=canonicalDerivationCertificate();payload.canonicalSymbolicIdentityCertificate=canonicalSymbolicIdentityCertificate();payload.verificationManifest=verificationManifest();
 var blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
 var url=URL.createObjectURL(blob),a=document.createElement("a");
 a.href=url;a.download="cican-v2-experiment-"+new Date().toISOString().replace(/[:.]/g,"-")+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);
