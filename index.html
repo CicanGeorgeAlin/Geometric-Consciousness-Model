@@ -275,14 +275,14 @@ function exportExperimentReport(){
  const validation=validationSummary();
  const reproducibility=reproducibilityMetadata();
  const stressSuite=runStressSuite();
- const parameterSweepResults=parameterSweep();
+ const parameterSweepResults=parameterSweep();\n const parameterTransitions=detectTransitions(parameterSweepResults);
  const certificate=buildAxiomCertificate();
  const payload={
   model:"CICAN Geometric Consciousness Model V2",
   branch:"v2-development",
   timestamp:new Date().toISOString(),
   canonicalModel:MODEL,
-  liveGeometry:live,validation:validation,reproducibility:reproducibility,stressSuite:stressSuite,parameterSweep:parameterSweepResults,certificate:certificate,experiments:experimentLog
+  liveGeometry:live,validation:validation,reproducibility:reproducibility,stressSuite:stressSuite,parameterSweep:parameterSweepResults,parameterTransitions:parameterTransitions,certificate:certificate,experiments:experimentLog
  };
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob);
@@ -318,6 +318,15 @@ function reproducibilityMetadata(){
   geometryEngine:"convex half-space intersection + convex hull volume",
   note:"Results are numerical computations for the current model configuration."
  };
+}
+function detectTransitions(results){
+ const transitions=[];
+ for(let i=1;i<results.length;i++){
+  if(results[i].state!==results[i-1].state){
+   transitions.push({from:results[i-1].state,to:results[i].state,lower:results[i-1].x,upper:results[i].x});
+  }
+ }
+ return transitions;
 }
 function parameterSweep(){
  const saved={p:tr.position.x,r:tr.rotation.z};
