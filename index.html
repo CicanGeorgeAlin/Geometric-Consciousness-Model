@@ -55,7 +55,7 @@ geometryViewport.appendChild(canvas);
 var ctx=canvas.getContext("2d");
 if(!ctx){loading.textContent="Canvas 2D is unavailable in this browser.";return}
 
-var MODEL={version:"2.68",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,0,0],pgRadius:2.4/(2*Math.sqrt(2))};
+var MODEL={version:"2.69",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,0,0],pgRadius:2.4/(2*Math.sqrt(2))};
 var EPS=1e-8, V={V:function(x,y,z){return{x:x,y:y,z:z}},add:function(a,b){return{x:a.x+b.x,y:a.y+b.y,z:a.z+b.z}},sub:function(a,b){return{x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}},mul:function(a,s){return{x:a.x*s,y:a.y*s,z:a.z*s}},dot:function(a,b){return a.x*b.x+a.y*b.y+a.z*b.z},cross:function(a,b){return{x:a.y*b.z-a.z*b.y,y:a.z*b.x-a.x*b.z,z:a.x*b.y-a.y*b.x}},len:function(a){return Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z)},norm:function(a){var l=this.len(a);return l?this.mul(a,1/l):{x:0,y:0,z:0}},dist:function(a,b){return this.len(this.sub(a,b))}};
 function rot(p,r){var x=p.x,y=p.y,z=p.z,c=Math.cos(r.x),s=Math.sin(r.x),y1=y*c-z*s,z1=y*s+z*c;y=y1;z=z1;c=Math.cos(r.y);s=Math.sin(r.y);var x1=x*c+z*s,z2=-x*s+z*c;x=x1;z=z2;c=Math.cos(r.z);s=Math.sin(r.z);x1=x*c-y*s;y1=x*s+y*c;return{x:x1,y:y1,z:z}}
 function clone(p){return{x:p.x,y:p.y,z:p.z}}
