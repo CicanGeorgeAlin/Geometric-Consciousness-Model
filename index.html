@@ -275,7 +275,7 @@ let experimentLog=[];
 function exportExperimentReport(){
  const live=classifyGeometry();
  const validation=validationSummary();
- const reproducibility=reproducibilityMetadata();\n const methodology=methodologyRecord();\n const epistemic=epistemicRecord();\n const manifest=experimentManifest();\n const modelFingerprint=canonicalModelFingerprint();
+ const reproducibility=reproducibilityMetadata();\n const methodology=methodologyRecord();\n const epistemic=epistemicRecord();\n const manifest=experimentManifest();\n const modelFingerprint=canonicalModelFingerprint();\n const audit=selfAudit();
  const stressSuite=runStressSuite();
  const parameterSweepResults=parameterSweep();\n const sweepConfiguration={parameter:"Tᵣ.position.x",start:-0.9,end:0.9,step:0.15,restoredCanonical:true};\n const parameterTransitions=detectTransitions(parameterSweepResults);\n const refinedTransitions=parameterTransitions.map(refineTransition);\n const sweepSummaryData=sweepSummary(parameterSweepResults,refinedTransitions);\n const stateRegions=buildStateRegions(parameterSweepResults);
  const certificate=buildAxiomCertificate();
@@ -284,7 +284,7 @@ function exportExperimentReport(){
   branch:"v2-development",
   timestamp:new Date().toISOString(),
   canonicalModel:MODEL,
-  liveGeometry:live,validation:validation,reproducibility:reproducibility,methodology:methodology,epistemicStatus:epistemic,experimentManifest:manifest,modelFingerprint:modelFingerprint,stressSuite:stressSuite,parameterSweep:parameterSweepResults,sweepConfiguration:sweepConfiguration,parameterTransitions:parameterTransitions,refinedTransitions:refinedTransitions,sweepSummary:sweepSummaryData,stateRegions:stateRegions,certificate:certificate,experiments:experimentLog
+  liveGeometry:live,validation:validation,reproducibility:reproducibility,methodology:methodology,epistemicStatus:epistemic,experimentManifest:manifest,modelFingerprint:modelFingerprint,selfAudit:audit,stressSuite:stressSuite,parameterSweep:parameterSweepResults,sweepConfiguration:sweepConfiguration,parameterTransitions:parameterTransitions,refinedTransitions:refinedTransitions,sweepSummary:sweepSummaryData,stateRegions:stateRegions,certificate:certificate,experiments:experimentLog
  };
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob);
@@ -310,6 +310,20 @@ function recordExperiment(label){
 let lastAxiomState="";
 function generateExperimentID(){
  return "EXP-"+new Date().toISOString().replace(/[-:.TZ]/g,"").slice(0,14)+"-"+Math.random().toString(36).slice(2,7).toUpperCase();
+}
+function selfAudit(){
+ const fp=canonicalModelFingerprint();
+ const manifest=experimentManifest();
+ const certificate=buildAxiomCertificate();
+ const consistent=manifest.modelFingerprint===fp&&certificate.modelFingerprint===fp&&MODEL.version==="2.33";
+ return {
+  modelVersion:MODEL.version,
+  fingerprint:fp,
+  manifestFingerprintMatches:manifest.modelFingerprint===fp,
+  certificateFingerprintMatches:certificate.modelFingerprint===fp,
+  versionMatches:MODEL.version==="2.33",
+  consistent
+ };
 }
 function canonicalModelFingerprint(){
  const raw=JSON.stringify({
