@@ -273,7 +273,7 @@ let experimentLog=[];
 function exportExperimentReport(){
  const live=classifyGeometry();
  const validation=validationSummary();
- const reproducibility=reproducibilityMetadata();\n const methodology=methodologyRecord();\n const epistemic=epistemicRecord();
+ const reproducibility=reproducibilityMetadata();\n const methodology=methodologyRecord();\n const epistemic=epistemicRecord();\n const manifest=experimentManifest();
  const stressSuite=runStressSuite();
  const parameterSweepResults=parameterSweep();\n const sweepConfiguration={parameter:"Tᵣ.position.x",start:-0.9,end:0.9,step:0.15,restoredCanonical:true};\n const parameterTransitions=detectTransitions(parameterSweepResults);\n const refinedTransitions=parameterTransitions.map(refineTransition);\n const sweepSummaryData=sweepSummary(parameterSweepResults,refinedTransitions);\n const stateRegions=buildStateRegions(parameterSweepResults);
  const certificate=buildAxiomCertificate();
@@ -282,7 +282,7 @@ function exportExperimentReport(){
   branch:"v2-development",
   timestamp:new Date().toISOString(),
   canonicalModel:MODEL,
-  liveGeometry:live,validation:validation,reproducibility:reproducibility,methodology:methodology,epistemicStatus:epistemic,stressSuite:stressSuite,parameterSweep:parameterSweepResults,sweepConfiguration:sweepConfiguration,parameterTransitions:parameterTransitions,refinedTransitions:refinedTransitions,sweepSummary:sweepSummaryData,stateRegions:stateRegions,certificate:certificate,experiments:experimentLog
+  liveGeometry:live,validation:validation,reproducibility:reproducibility,methodology:methodology,epistemicStatus:epistemic,experimentManifest:manifest,stressSuite:stressSuite,parameterSweep:parameterSweepResults,sweepConfiguration:sweepConfiguration,parameterTransitions:parameterTransitions,refinedTransitions:refinedTransitions,sweepSummary:sweepSummaryData,stateRegions:stateRegions,certificate:certificate,experiments:experimentLog
  };
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob);
@@ -308,6 +308,22 @@ function recordExperiment(label){
 let lastAxiomState="";
 function generateExperimentID(){
  return "EXP-"+new Date().toISOString().replace(/[-:.TZ]/g,"").slice(0,14)+"-"+Math.random().toString(36).slice(2,7).toUpperCase();
+}
+function experimentManifest(){
+ return {
+  schemaVersion:"1.0",
+  modelVersion:"V2",
+  canonicalParameters:{
+   cubeHalf:MODEL.cubeHalf,
+   tetraEdge:MODEL.tetraEdge,
+   tetraLRotation:[MODEL.tetraLRotation.x,MODEL.tetraLRotation.y,MODEL.tetraLRotation.z],
+   tetraRRotation:[MODEL.tetraRRotation.x,MODEL.tetraRRotation.y,MODEL.tetraRRotation.z],
+   pgRadius:MODEL.pgRadius
+  },
+  tolerances:{containment:1e-8,volumeEquality:1e-6,distance:1e-5},
+  automatedTests:["canonical validation","stress suite","Tᵣ X parameter sweep","transition refinement"],
+  exportFormat:"JSON"
+ };
 }
 function epistemicRecord(){
  return {
