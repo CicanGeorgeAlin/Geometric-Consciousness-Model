@@ -329,12 +329,27 @@ function selfAudit(){
  const fp=canonicalModelFingerprint();
  const manifest=experimentManifest();
  const certificate=buildAxiomCertificate();
- const consistent=manifest.modelFingerprint===fp&&certificate.modelFingerprint===fp&&MODEL.version==="2.33";
+ const manifestModel={
+  version:manifest.modelVersion,
+  cubeHalf:manifest.canonicalParameters.cubeHalf,
+  tetraEdge:manifest.canonicalParameters.tetraEdge,
+  tetraLRotation:manifest.canonicalParameters.tetraLRotation,
+  tetraRRotation:manifest.canonicalParameters.tetraRRotation,
+  pgRadius:manifest.canonicalParameters.pgRadius
+ };
+ const exportedFingerprint=(()=>{
+  const raw=JSON.stringify(manifestModel);
+  let h=2166136261;
+  for(let i=0;i<raw.length;i++){h^=raw.charCodeAt(i);h=Math.imul(h,16777619);}
+  return (h>>>0).toString(16).padStart(8,"0");
+ })();
+ const consistent=manifest.modelFingerprint===fp&&certificate.modelFingerprint===fp&&exportedFingerprint===fp&&MODEL.version==="2.33";
  return {
   modelVersion:MODEL.version,
   fingerprint:fp,
   manifestFingerprintMatches:manifest.modelFingerprint===fp,
   certificateFingerprintMatches:certificate.modelFingerprint===fp,
+  exportedParametersFingerprintMatches:exportedFingerprint===fp,
   versionMatches:MODEL.version==="2.33",
   consistent
  };
