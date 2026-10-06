@@ -40,9 +40,20 @@ PG · central octahedral object
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
+window.addEventListener("error",function(e){
+ const el=document.getElementById("loading");
+ if(el) el.innerHTML="V2 INITIALIZATION ERROR<br><small>"+String(e.message||"Runtime error")+"</small>";
+});
+window.addEventListener("unhandledrejection",function(e){
+ const el=document.getElementById("loading");
+ if(el) el.innerHTML="V2 INITIALIZATION ERROR<br><small>"+String(e.reason&&e.reason.message||e.reason||"Promise error")+"</small>";
+});
+</script>
+<script>
 (()=>{"use strict";
 const loading=document.getElementById("loading"), metrics=document.getElementById("metrics"), status=document.getElementById("axiomStatus");
 if(!window.THREE){loading.textContent="Three.js failed to load.";return}
+if(!THREE.OrbitControls){loading.textContent="OrbitControls failed to load.";return}
 const scene=new THREE.Scene(), camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,.1,100);
 camera.position.set(4.8,3.6,6.2);
 const renderer=new THREE.WebGLRenderer({antialias:true});
