@@ -273,13 +273,14 @@ let experimentLog=[];
 function exportExperimentReport(){
  const live=classifyGeometry();
  const validation=validationSummary();
+ const stressSuite=runStressSuite();
  const certificate=buildAxiomCertificate();
  const payload={
   model:"CICAN Geometric Consciousness Model V2",
   branch:"v2-development",
   timestamp:new Date().toISOString(),
   canonicalModel:MODEL,
-  liveGeometry:live,validation:validation,certificate:certificate,experiments:experimentLog
+  liveGeometry:live,validation:validation,stressSuite:stressSuite,certificate:certificate,experiments:experimentLog
  };
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob);
@@ -303,6 +304,22 @@ function recordExperiment(label){
  experimentLog=experimentLog.slice(0,8); renderExperimentHistory();
 }
 let lastAxiomState="";
+function runStressSuite(){
+ const saved={lp:tl.position.clone(),lr:tl.rotation.clone(),rp:tr.position.clone(),rr:tr.rotation.clone()};
+ const cases=[];
+ const addCase=(name,fn)=>{
+  fn(); tl.updateMatrixWorld(true);tr.updateMatrixWorld(true);pg.updateMatrixWorld(true);
+  const g=classifyGeometry(); cases.push({name,state:g.equality?"MATCH":(g.cubeOK&&g.intersectionVertices>=4&&g.pgInsideIntersection?"CONTAINED / UNRESOLVED":"FAILED"),volumeRatio:g.volumeRatio,distance:g.distance});
+ };
+ addCase("canonical",()=>{});
+ addCase("Tₗ shifted +0.30X",()=>{tl.position.x+=.3});
+ tl.position.copy(saved.lp);tl.rotation.copy(saved.lr);tr.position.copy(saved.rp);tr.rotation.copy(saved.rr);
+ addCase("Tᵣ shifted −0.30X",()=>{tr.position.x-=.3});
+ tl.position.copy(saved.lp);tl.rotation.copy(saved.lr);tr.position.copy(saved.rp);tr.rotation.copy(saved.rr);
+ addCase("Tᵣ twisted +15°",()=>{tr.rotation.z+=Math.PI/12});
+ tl.position.copy(saved.lp);tl.rotation.copy(saved.lr);tr.position.copy(saved.rp);tr.rotation.copy(saved.rr);
+ return cases;
+}
 function buildAxiomCertificate(){
  const v=validationSummary();
  const status=v.allPassed?"NUMERICAL MATCH":"NOT ESTABLISHED";
