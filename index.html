@@ -286,7 +286,7 @@ function canonicalExactSetCertificate(){
 var e=MODEL.tetraEdge,a=e/(2*Math.sqrt(2)),g=classify(),tol=1e-7;
 var expectedSigns=[[1,1,1],[1,1,-1],[1,-1,1],[1,-1,-1],[-1,1,1],[-1,1,-1],[-1,-1,1],[-1,-1,-1]];
 var livePlanes=tetraPlanes(objects.L).concat(tetraPlanes(objects.R));
-var expectedPlanes=expectedSigns.map(function(c){var n=V.norm(V.V(c[0],c[1],c[2]));return{n:n,q:-a/Math.sqrt(3)}}).filter(function(p,i){return i<8});
+var expectedPlanes=expectedSigns.map(function(c){var n=V.norm(V.V(-c[0],-c[1],-c[2]));return{n:n,q:a/Math.sqrt(3)}}).filter(function(p,i){return i<8});
 var planeCoverage=expectedPlanes.every(function(ep){
 return livePlanes.some(function(lp){return Math.abs(V.dot(ep.n,lp.n)-1)<tol&&Math.abs(ep.q-lp.q)<tol;});
 });
