@@ -55,7 +55,7 @@ document.getElementById("app").appendChild(canvas);
 var ctx=canvas.getContext("2d");
 if(!ctx){loading.textContent="Canvas 2D is unavailable in this browser.";return}
 
-var MODEL={version:"2.44",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,0,0],pgRadius:2.4/(2*Math.sqrt(2))};
+var MODEL={version:"2.45",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,0,0],pgRadius:2.4/(2*Math.sqrt(2))};
 var EPS=1e-8, V={x:function(x,y,z){return{x:x,y:y,z:z}},add:function(a,b){return{x:a.x+b.x,y:a.y+b.y,z:a.z+b.z}},sub:function(a,b){return{x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}},mul:function(a,s){return{x:a.x*s,y:a.y*s,z:a.z*s}},dot:function(a,b){return a.x*b.x+a.y*b.y+a.z*b.z},cross:function(a,b){return{x:a.y*b.z-a.z*b.y,y:a.z*b.x-a.x*b.z,z:a.x*b.y-a.y*b.x}},len:function(a){return Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z)},norm:function(a){var l=this.len(a);return l?this.mul(a,1/l):{x:0,y:0,z:0}},dist:function(a,b){return this.len(this.sub(a,b))}};
 function rot(p,r){var x=p.x,y=p.y,z=p.z,c=Math.cos(r.x),s=Math.sin(r.x),y1=y*c-z*s,z1=y*s+z*c;y=y1;z=z1;c=Math.cos(r.y);s=Math.sin(r.y);var x1=x*c+z*s,z2=-x*s+z*c;x=x1;z=z2;c=Math.cos(r.z);s=Math.sin(r.z);x1=x*c-y*s;y1=x*s+y*c;return{x:x1,y:y1,z:z}}
 function clone(p){return{x:p.x,y:p.y,z:p.z}}
@@ -143,6 +143,21 @@ if(label){history.unshift({label:label,state:st,time:new Date().toLocaleTimeStri
 document.getElementById("integrity").innerHTML="<span class='ok'>PASS</span><br>model: "+MODEL.version+"<br>fingerprint: "+fingerprint()+"<br>renderer: native Canvas 2D<br>external dependencies: 0";
 return g
 }
+function parameterSweep(axis,start,end,step){
+var baseL={t:clone(objects.L.t),r:clone(objects.L.r)},baseR={t:clone(objects.R.t),r:clone(objects.R.r)},out=[];
+for(var x=start;x<=end+step/10;x+=step){
+objects.L.t=clone(baseL.t);objects.L.r=clone(baseL.r);objects.R.t=clone(baseR.t);objects.R.r=clone(baseR.r);
+if(axis==="R.x")objects.R.t.x=x;
+if(axis==="R.z")objects.R.r.z=x;
+if(axis==="L.x")objects.L.t.x=x;
+var g=classify();out.push({x:Number(x.toFixed(4)),state:state(g),vertices:g.iv.length,volumeRatio:Number(g.ratio.toFixed(8)),distance:Number(isFinite(g.distance)?g.distance.toFixed(8):"Infinity")});
+}
+objects.L.t=clone(baseL.t);objects.L.r=clone(baseL.r);objects.R.t=clone(baseR.t);objects.R.r=clone(baseR.r);
+return out;
+}
+function sweepTransitions(results){
+var out=[];for(var i=1;i<results.length;i++)if(results[i].state!==results[i-1].state)out.push({from:results[i-1].state,to:results[i].state,lower:results[i-1].x,upper:results[i].x});return out;
+}
 function perturbationSuite(){
 var baseL={t:clone(objects.L.t),r:clone(objects.L.r)},baseR={t:clone(objects.R.t),r:clone(objects.R.r)};
 var cases=[
@@ -172,7 +187,7 @@ return{
 }
 }
 function exportExperiment(){
-var payload=experimentSnapshot();payload.perturbationSuite=perturbationSuite();
+var payload=experimentSnapshot();payload.perturbationSuite=perturbationSuite();payload.parameterSweeps={translationR:parameterSweep("R.x",-0.9,0.9,0.15),rotationR:parameterSweep("R.z",-Math.PI/2,Math.PI/2,Math.PI/24)};payload.transitions={translationR:sweepTransitions(payload.parameterSweeps.translationR),rotationR:sweepTransitions(payload.parameterSweeps.rotationR)};
 var blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
 var url=URL.createObjectURL(blob),a=document.createElement("a");
 a.href=url;a.download="cican-v2-experiment-"+new Date().toISOString().replace(/[:.]/g,"-")+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);
