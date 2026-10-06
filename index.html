@@ -520,7 +520,7 @@ function report(){
  status.className=(cubeOK&&nonEmpty)?'ok':'pending';
 }
 let auto=true, wire=true;
-document.getElementById("rotate").onclick=()=>{auto=!auto;event.currentTarget.classList.toggle("active",auto)};
+document.getElementById("rotate").onclick=(e)=>{auto=!auto;e.currentTarget.classList.toggle("active",auto)};
 document.getElementById("wire").onclick=()=>{wire=!wire;[cube,tl,tr,pg].forEach(m=>m.material.wireframe=wire);event.currentTarget.classList.toggle("active",wire)};
 document.getElementById("reset").onclick=()=>{camera.position.set(4.8,3.6,6.2);controls.target.set(0,0,0);controls.update();root.rotation.set(0,0,0)};
 addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
