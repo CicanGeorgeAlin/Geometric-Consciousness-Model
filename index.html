@@ -272,12 +272,13 @@ function convexPlanesFromPoints(points){
 let experimentLog=[];
 function exportExperimentReport(){
  const live=classifyGeometry();
+ const validation=validationSummary();
  const payload={
   model:"CICAN Geometric Consciousness Model V2",
   branch:"v2-development",
   timestamp:new Date().toISOString(),
   canonicalModel:MODEL,
-  liveGeometry:live,experiments:experimentLog
+  liveGeometry:live,validation:validation,experiments:experimentLog
  };
  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
  const url=URL.createObjectURL(blob);
@@ -301,6 +302,19 @@ function recordExperiment(label){
  experimentLog=experimentLog.slice(0,8); renderExperimentHistory();
 }
 let lastAxiomState="";
+function validationSummary(){
+ const g=classifyGeometry();
+ const checks=[
+  ["PG contained in C",g.cubeOK],
+  ["Tetrahedron intersection is 3D",g.intersectionVertices>=4],
+  ["PG contained in intersection",g.pgInsideIntersection],
+  ["Intersection contained in PG",g.intersectionInsidePG],
+  ["Volume ratio ≈ 1",Math.abs(g.volumeRatio-1)<1e-6],
+  ["Distance estimate ≈ 0",g.distance!==null&&g.distance<1e-5]
+ ];
+ const passed=checks.filter(x=>x[1]).length;
+ return {checks,passed,total:checks.length,allPassed:passed===checks.length};
+}
 function classifyGeometry(){
  const pv=tetraVertices(pg);
  const cubeOK=pv.every(insideCube);
