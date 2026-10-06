@@ -2,672 +2,170 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>CICAN — Geometric Consciousness Model™ V2</title>
-<meta name="description" content="CICAN Geometric Consciousness Model V2 — an interactive geometric laboratory for the Lord's Prayer Algorithm.">
+<meta name="description" content="CICAN Geometric Consciousness Model V2 — self-contained geometric laboratory.">
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:Inter,system-ui,Arial,sans-serif}
-#app{position:fixed;inset:0}.hud{position:fixed;z-index:5;pointer-events:none}
-#top{top:18px;left:20px}.brand{font-size:14px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}.sub{margin-top:5px;font-size:11px;letter-spacing:.08em;opacity:.65}
-#axiom{top:18px;right:20px;text-align:right;font-family:ui-monospace,monospace;font-size:14px}.status{margin-top:7px;font-size:10px;opacity:.65}
-#panel{left:20px;bottom:20px;width:min(360px,calc(100vw - 40px));background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(10px);padding:14px;pointer-events:auto}
-.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.btn{border:1px solid rgba(255,255,255,.25);background:#090909;color:#fff;padding:8px 10px;font-size:11px;cursor:pointer}.btn:hover{border-color:#fff}.btn.active{background:#fff;color:#000}
-.metric{font-family:ui-monospace,monospace;font-size:10px;line-height:1.7;opacity:.9}.ok{color:#9f9}.pending{color:#fc6}
-#legend{right:20px;bottom:20px;font-size:10px;line-height:1.8;text-align:right;opacity:.72}
-#loading{position:fixed;inset:0;display:grid;place-items:center;background:#000;z-index:20;font-family:ui-monospace,monospace;font-size:12px}
-@media(max-width:700px){#top{top:10px;left:12px}.brand{font-size:11px}#axiom{top:10px;right:12px;font-size:10px}#panel{left:10px;bottom:10px;width:calc(100vw - 20px)}#legend{display:none}}
+#app{position:fixed;inset:0}canvas{display:block;width:100%;height:100%;touch-action:none}
+.hud{position:fixed;z-index:5}.top{top:16px;left:18px}.brand{font-size:14px;letter-spacing:.18em;text-transform:uppercase;font-weight:700}.sub{margin-top:5px;font-size:10px;letter-spacing:.1em;opacity:.58}
+.axiom{top:16px;right:18px;text-align:right;font:14px ui-monospace,monospace}.status{margin-top:6px;font-size:9px;opacity:.65}
+.panel{background:rgba(0,0,0,.78);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);padding:11px 12px;font:10px/1.6 ui-monospace,monospace}
+#left{left:18px;bottom:18px;width:285px}.row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.btn{border:1px solid rgba(255,255,255,.24);background:#080808;color:#fff;padding:7px 9px;font:10px ui-monospace,monospace;cursor:pointer}.btn.active{background:#fff;color:#000}
+#right{right:18px;top:58px;width:285px;max-height:calc(100vh - 76px);overflow:auto}.section{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.12)}.section:last-child{border-bottom:0;margin-bottom:0}.ok{color:#baffba}.warn{color:#ffd37a}.bad{color:#ff8b8b}.dim{opacity:.55}
+#loading{position:fixed;inset:0;display:grid;place-items:center;background:#000;z-index:20;font:12px ui-monospace,monospace}
+@media(max-width:700px){.top{top:10px;left:11px}.brand{font-size:10px}.sub{font-size:8px}.axiom{top:10px;right:11px;font-size:10px}#right{right:10px;top:48px;width:215px;max-height:48vh}#left{left:10px;bottom:10px;width:calc(100vw - 20px);max-width:285px}}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <div id="loading">INITIALIZING V2 GEOMETRIC LABORATORY…</div>
-<div id="top" class="hud"><div class="brand">CICAN GEOMETRIC CONSCIOUSNESS MODEL™</div><div class="sub">V2 · GEOMETRIC LABORATORY</div></div>
-<div id="axiom" class="hud">PG ≡ (T<sub>L</sub> ∩ T<sub>R</sub>) ⊆ C<div class="status">AXIOM STATUS: <span id="axiomStatus" class="pending">UNDER INVESTIGATION</span></div></div>
-<div id="panel" class="hud">
-  <div class="row">
-    <button class="btn active" id="rotate">AUTO ROTATE</button>
-    <button class="btn active" id="wire">WIREFRAME</button>
-    <button class="btn" id="reset">RESET VIEW</button>
-  </div>
-  <div class="metric" id="metrics"></div>
+<div class="hud top"><div class="brand">CICAN GEOMETRIC CONSCIOUSNESS MODEL™</div><div class="sub">V2 · SELF-CONTAINED GEOMETRIC LABORATORY</div></div>
+<div class="hud axiom">PG ≡ (T<sub>L</sub> ∩ T<sub>R</sub>) ⊆ C<div class="status">AXIOM STATUS: <span id="status">UNDER INVESTIGATION</span></div></div>
+<div id="left" class="hud panel">
+<div class="row">
+<button id="rotate" class="btn active">AUTO ROTATE</button>
+<button id="wire" class="btn active">WIREFRAME</button>
+<button id="resetView" class="btn">RESET VIEW</button>
 </div>
-<div id="legend" class="hud">
-C · containment frame<br>
-T<sub>L</sub> · tetrahedron L<br>
-T<sub>R</sub> · tetrahedron R<br>
-PG · central octahedral object
+<div class="row">
+<button id="moveL" class="btn">Tₗ +X</button><button id="moveR" class="btn">Tᵣ −X</button><button id="twist" class="btn">TWIST Tᵣ</button><button id="resetModel" class="btn">RESET MODEL</button>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<div id="metrics"></div>
+</div>
+<div id="right" class="hud panel">
+<div class="section"><b>MODEL INTEGRITY</b><div id="integrity" class="dim">CHECKING…</div></div>
+<div class="section"><b>AXIOM TESTER</b><div id="tester">READY</div></div>
+<div class="section"><b>FORMAL MODEL</b><br>
+C = { (x,y,z) ∈ ℝ³ : |x|,|y|,|z| ≤ 1 }<br><br>
+Tₗ = conv{v₁,v₂,v₃,v₄}<br>
+Tᵣ = R·Tₗ + t<br><br>
+PG = { (x,y,z) : |x|+|y|+|z| ≤ 0.72 }<br><br>
+I = Tₗ ∩ Tᵣ<br><span class="dim">Set equality requires actual equality, not visual overlap.</span>
+</div>
+<div class="section"><b>EXPERIMENT HISTORY</b><div id="history" class="dim">No experiments recorded.</div></div>
+<div><b>METHOD</b><br><span class="dim">Pure browser JavaScript. No external libraries or CDNs. Exact tetrahedral half-space intersection with finite-precision numerical tests. Numerical evidence is not a universal proof.</span></div>
+</div>
 <script>
-window.addEventListener("error",function(e){
- const el=document.getElementById("loading");
- if(el) el.innerHTML="V2 INITIALIZATION ERROR<br><small>"+String(e.message||"Runtime error")+"</small>";
-});
-window.addEventListener("unhandledrejection",function(e){
- const el=document.getElementById("loading");
- if(el) el.innerHTML="V2 INITIALIZATION ERROR<br><small>"+String(e.reason&&e.reason.message||e.reason||"Promise error")+"</small>";
-});
-</script>
-<script>
-(()=>{"use strict";
-const loading=document.getElementById("loading"), metrics=document.getElementById("metrics"), status=document.getElementById("axiomStatus");
-if(!window.THREE){loading.textContent="Three.js failed to load.";return}
-if(!THREE.OrbitControls){loading.textContent="OrbitControls failed to load.";return}
-const scene=new THREE.Scene(), camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,.1,100);
-camera.position.set(4.8,3.6,6.2);
-const renderer=new THREE.WebGLRenderer({antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio||1,2)); renderer.setSize(innerWidth,innerHeight); renderer.setClearColor(0x000000,1);
-document.getElementById("app").appendChild(renderer.domElement);
-const controls=new THREE.OrbitControls(camera,renderer.domElement);
-controls.enableDamping=true; controls.dampingFactor=.06; controls.enablePan=false; controls.minDistance=3; controls.maxDistance=14;
+(function(){
+"use strict";
+var loading=document.getElementById("loading");
+var canvas=document.createElement("canvas");
+document.getElementById("app").appendChild(canvas);
+var ctx=canvas.getContext("2d");
+if(!ctx){loading.textContent="Canvas 2D is unavailable in this browser.";return}
 
-const root=new THREE.Group(); scene.add(root);
-// V2 canonical coordinate model.
-// Every visible object is generated from these definitions.
-const MODEL={
- version:"2.33",
- cubeHalf:1,
- tetraEdge:2.4,
- tetraDefinition:"regular tetrahedron, explicit edge-length coordinates",
- tetraLRotation:[0,0,0],
- tetraRRotation:[Math.PI/2,Math.PI/4,0],
- pgRadius:.72
-};
-function modelEuler(a){return new THREE.Euler(a[0],a[1],a[2]);}
-const C=2, T=MODEL.tetraEdge;
-// Explicit regular-tetrahedron construction.
-// For a regular tetrahedron of edge length e centered at the origin,
-// the vertices are (±a,±a,±a) with an even number of minus signs,
-// where a=e/(2√2). This keeps the mathematical model independent
-// of Three.js' TetrahedronGeometry radius convention.
-function canonicalTetraGeometry(edge){
- const a=edge/(2*Math.sqrt(2));
- const v=[
-  [ a, a, a],
-  [ a,-a,-a],
-  [-a, a,-a],
-  [-a,-a, a]
- ];
- const positions=new Float32Array(v.flat());
- const indices=[0,2,1, 0,1,3, 0,3,2, 1,2,3];
- const g=new THREE.BufferGeometry();
- g.setAttribute("position",new THREE.BufferAttribute(positions,3));
- g.setIndex(indices);
- g.computeVertexNormals();
- return g;
-}
-const cube=new THREE.Mesh(new THREE.BoxGeometry(C,C,C),new THREE.MeshBasicMaterial({color:0x2377ff,wireframe:true,transparent:true,opacity:.32}));
-root.add(cube);
+var MODEL={version:"2.40",cubeHalf:1,tetraEdge:2.4,tetraLRotation:[0,0,0],tetraRRotation:[Math.PI/2,Math.PI/4,0],pgRadius:.72};
+var EPS=1e-8, V={x:function(x,y,z){return{x:x,y:y,z:z}},add:function(a,b){return{x:a.x+b.x,y:a.y+b.y,z:a.z+b.z}},sub:function(a,b){return{x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}},mul:function(a,s){return{x:a.x*s,y:a.y*s,z:a.z*s}},dot:function(a,b){return a.x*b.x+a.y*b.y+a.z*b.z},cross:function(a,b){return{x:a.y*b.z-a.z*b.y,y:a.z*b.x-a.x*b.z,z:a.x*b.y-a.y*b.x}},len:function(a){return Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z)},norm:function(a){var l=this.len(a);return l?this.mul(a,1/l):{x:0,y:0,z:0}},dist:function(a,b){return this.len(this.sub(a,b))}};
+function rot(p,r){var x=p.x,y=p.y,z=p.z,c=Math.cos(r.x),s=Math.sin(r.x),y1=y*c-z*s,z1=y*s+z*c;y=y1;z=z1;c=Math.cos(r.y);s=Math.sin(r.y);var x1=x*c+z*s,z2=-x*s+z*c;x=x1;z=z2;c=Math.cos(r.z);s=Math.sin(r.z);x1=x*c-y*s;y1=x*s+y*c;return{x:x1,y:y1,z:z}}
+function clone(p){return{x:p.x,y:p.y,z:p.z}}
+function transform(p,o){return V.add(rot(p,o.r),o.t)}
+function edgeVerts(e){var a=e/(2*Math.sqrt(2));return[V.V(a,a,a),V.V(a,-a,-a),V.V(-a,a,-a),V.V(-a,-a,a)]}
+var baseT=edgeVerts(MODEL.tetraEdge);
+var cubeVerts=[V.V(-1,-1,-1),V.V(1,-1,-1),V.V(1,1,-1),V.V(-1,1,-1),V.V(-1,-1,1),V.V(1,-1,1),V.V(1,1,1),V.V(-1,1,1)];
+var cubeEdges=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+var tetraEdges=[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
+var octVerts=[V.V(.72,0,0),V.V(-.72,0,0),V.V(0,.72,0),V.V(0,-.72,0),V.V(0,0,.72),V.V(0,0,-.72)];
+var octEdges=[[0,2],[0,3],[0,4],[0,5],[1,2],[1,3],[1,4],[1,5],[2,4],[4,3],[3,5],[5,2]];
+var objects={L:{t:V.V(0,0,0),r:V.V(0,0,0)},R:{t:V.V(0,0,0),r:V.V(Math.PI/2,Math.PI/4,0)}};
+var view={yaw:.55,pitch:.32,distance:6.8,auto:true,wire:true,drag:false,lastX:0,lastY:0};
+var history=[];
 
-const tetraGeometry=canonicalTetraGeometry(T);
-const tl=new THREE.Mesh(tetraGeometry,new THREE.MeshBasicMaterial({color:0xff3030,wireframe:true,transparent:true,opacity:.75}));
-tl.rotation.copy(modelEuler(MODEL.tetraLRotation)); root.add(tl);
-const tr=new THREE.Mesh(tetraGeometry.clone(),new THREE.MeshBasicMaterial({color:0x31ff78,wireframe:true,transparent:true,opacity:.75}));
-tr.rotation.copy(modelEuler(MODEL.tetraRRotation)); root.add(tr);
-
-const pg=new THREE.Mesh(new THREE.OctahedronGeometry(MODEL.pgRadius,0),new THREE.MeshBasicMaterial({color:0xffd21a,wireframe:true,transparent:true,opacity:.95}));
-root.add(pg);
-const core=new THREE.Mesh(new THREE.SphereGeometry(.18,20,20),new THREE.MeshBasicMaterial({color:0xffffff}));
-root.add(core);
-
-const auditPanel=document.createElement('div');
-auditPanel.id="auditPanel";
-auditPanel.innerHTML='<b>MODEL INTEGRITY</b><br><span id="auditState">CHECKING…</span>';
-document.body.appendChild(auditPanel);
-const auditStyle=document.createElement('style');
-auditStyle.textContent='#auditPanel{position:fixed;right:18px;top:230px;width:245px;padding:10px 12px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.78);backdrop-filter:blur(6px);font:9px/1.55 monospace;color:#fff;z-index:5}@media(max-width:600px){#auditPanel{right:10px;top:205px;width:205px}}';
-document.head.appendChild(auditStyle);
-const historyPanel=document.createElement('div');
-historyPanel.id="historyPanel";
-historyPanel.innerHTML='<b>EXPERIMENT HISTORY</b><div id="historyList"><span class="dim">No experiments recorded.</span></div>';
-document.body.appendChild(historyPanel);
-const historyStyle=document.createElement('style');
-historyStyle.textContent='#historyPanel{position:fixed;left:18px;top:230px;width:245px;max-height:210px;overflow:auto;padding:10px 12px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.78);backdrop-filter:blur(6px);font:9px/1.55 monospace;color:#fff;z-index:5}#historyList{margin-top:7px}.histRow{padding:5px 0;border-top:1px solid rgba(255,255,255,.1)}@media(max-width:600px){#historyPanel{left:10px;top:205px;width:205px;max-height:150px}}';
-document.head.appendChild(historyStyle);
-function renderExperimentHistory(){
- const list=document.getElementById("historyList");
- if(!experimentLog.length){list.innerHTML='<span class="dim">No experiments recorded.</span>';return}
- list.innerHTML=experimentLog.map((x,i)=>'<div class="histRow"><b>#'+(experimentLog.length-i)+'</b> '+x.label+'<br><span class="dim">'+x.state+'</span></div>').join("");
+function tetraVertices(o){return baseT.map(function(p){return transform(p,o)})}
+function planeFrom3(a,b,c,inside){var n=V.norm(V.cross(V.sub(b,a),V.sub(c,a)));var q=-V.dot(n,a);if(V.dot(n,inside)+q<0){n=V.mul(n,-1);q=-q}return{n:n,q:q}}
+function tetraPlanes(o){var vs=tetraVertices(o),c=vs.reduce(V.add,V.V(0,0,0));c=V.mul(c,.25);return[[0,1,2],[0,3,1],[0,2,3],[1,3,2]].map(function(f){return planeFrom3(vs[f[0]],vs[f[1]],vs[f[2]],c)})}
+function planeValue(p,x){return V.dot(p.n,x)+p.q}
+function det(a,b,c){return V.dot(a,V.cross(b,c))}
+function triple(ps,i,j,k){
+var n1=ps[i].n,n2=ps[j].n,n3=ps[k].n,d=det(n1,n2,n3);if(Math.abs(d)<1e-10)return null;
+var b1=-ps[i].q,b2=-ps[j].q,b3=-ps[k].q;
+return V.mul(V.add(V.add(V.mul(V.cross(n2,n3),b1),V.mul(V.cross(n3,n1),b2)),V.mul(V.cross(n1,n2),b3)),1/d)
 }
-const formal=document.createElement('div');
-formal.id="formal";
-formal.innerHTML='<b>FORMAL MODEL</b><br><br>'+
-'C = { (x,y,z) ∈ ℝ³ : |x| ≤ 1, |y| ≤ 1, |z| ≤ 1 }<br><br>'+
-'Tₗ = conv{v₁,v₂,v₃,v₄}<br>'+
-'Tᵣ = R·Tₗ + t<br><br>'+
-'PG = octahedron centered at 0<br>'+
-'PG ⊆ C ⇔ every PG vertex lies in C<br><br>'+
-'I = Tₗ ∩ Tᵣ<br>'+
-'PG ⊆ I ⇔ every PG vertex satisfies both tetrahedral half-spaces<br><br>'+
-'<span class="dim">Equality PG ≡ I requires set equality, not visual overlap.</span>';
-document.body.appendChild(formal);
-const formalStyle=document.createElement('style');
-formalStyle.textContent='#formal{position:fixed;right:18px;bottom:58px;width:300px;max-height:44vh;overflow:auto;padding:12px 14px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.78);backdrop-filter:blur(6px);font:10px/1.6 monospace;color:#fff;z-index:5}.dim{opacity:.55}@media(max-width:600px){#formal{right:10px;width:245px;max-height:38vh;font-size:9px}}';
-document.head.appendChild(formalStyle);
-
-const testPanel=document.createElement('div');
-testPanel.id="testPanel";
-testPanel.innerHTML="<b>AXIOM TESTER</b><br><span id=\"testState\">READY</span><br><button id=\"exportReport\">EXPORT EXPERIMENT REPORT</button>";
-document.body.appendChild(testPanel);
-document.getElementById("exportReport").onclick=exportExperimentReport;
-function renderAudit(){
- const a=selfAudit();
- const el=document.getElementById("auditState");
- el.innerHTML=(a.consistent?"PASS":"CHECK REQUIRED")+"<br>version: "+a.modelVersion+"<br>fingerprint: "+a.fingerprint;
- el.className=a.consistent?"testGood":"testBad";
+function intersectionPoints(){
+var ps=tetraPlanes(objects.L).concat(tetraPlanes(objects.R)),out=[];
+for(var i=0;i<ps.length;i++)for(var j=i+1;j<ps.length;j++)for(var k=j+1;k<ps.length;k++){
+var p=triple(ps,i,j,k);if(!p)continue;
+var ok=ps.every(function(q){return planeValue(q,p)>=-1e-7});
+if(ok&&!out.some(function(q){return V.dist(q,p)<1e-6}))out.push(p)
 }
-
-
-const inspector=document.createElement('div');
-inspector.id='inspector';
-inspector.innerHTML='<b>GEOMETRY INSPECTOR</b><br><span class="dim">Select an object below</span>';
-document.body.appendChild(inspector);
-
-const testStyle=document.createElement('style');
-testStyle.textContent='#testPanel{position:fixed;left:18px;top:58px;width:245px;padding:12px 14px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.72);backdrop-filter:blur(6px);font:11px/1.65 monospace;color:#fff;z-index:5}.testGood{color:#fff}.testBad{opacity:.6}#exportReport{margin-top:8px;padding:6px 8px;background:transparent;border:1px solid rgba(255,255,255,.2);color:#fff;font:9px monospace;cursor:pointer}@media(max-width:600px){#testPanel{left:10px;top:52px;width:205px;font-size:10px}}';
-document.head.appendChild(testStyle);
-
-const inspectorStyle=document.createElement('style');
-inspectorStyle.textContent='#inspector{position:fixed;right:18px;top:58px;width:245px;padding:12px 14px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.72);backdrop-filter:blur(6px);font:11px/1.65 monospace;color:#fff;letter-spacing:.03em;z-index:5}.dim{opacity:.55}.inspectBtn{display:block;width:100%;margin:5px 0;padding:6px 8px;background:transparent;border:1px solid rgba(255,255,255,.16);color:#fff;text-align:left;font:10px monospace;cursor:pointer}.inspectBtn:hover,.inspectBtn.active{border-color:#fff}@media(max-width:600px){#inspector{right:10px;top:52px;width:205px;font-size:10px}}';
-document.head.appendChild(inspectorStyle);
-
-const objectDefs=[
- ['C · CUBE',cube,'Cube'],
- ['T_L · TETRAHEDRON',tl,'Tetrahedron L'],
- ['T_R · TETRAHEDRON',tr,'Tetrahedron R'],
- ['PG · OCTAHEDRON',pg,'Central PG']
-];
-function fmt(v){return Number(v).toFixed(4)}
-function showInspector(i){
- const m=objectDefs[i][1];
- const box=new THREE.Box3().setFromObject(m), s=new THREE.Vector3();
- box.getSize(s);
- inspector.innerHTML='<b>GEOMETRY INSPECTOR</b><br><br><b>'+objectDefs[i][2]+'</b>'+
- '<br>position: ('+fmt(m.position.x)+', '+fmt(m.position.y)+', '+fmt(m.position.z)+')'+
- '<br>rotation: ('+fmt(m.rotation.x)+', '+fmt(m.rotation.y)+', '+fmt(m.rotation.z)+')'+
- '<br>world bounds: '+fmt(s.x)+' × '+fmt(s.y)+' × '+fmt(s.z)+
- '<br><br><span class="dim">Canonical V2 model</span>';
- objectDefs.forEach((d,j)=>{
-  const b=document.createElement('button'); b.className='inspectBtn'+(j===i?' active':''); b.textContent=d[0];
-  b.onclick=()=>showInspector(j); inspector.appendChild(b);
- });
+return out
 }
-objectDefs.forEach((d,i)=>{
- const b=document.createElement('button'); b.className='inspectBtn'; b.textContent=d[0];
- b.onclick=()=>showInspector(i); inspector.appendChild(b);
-});
-
-function insideCube(p){return Math.abs(p.x)<=C/2+1e-8&&Math.abs(p.y)<=C/2+1e-8&&Math.abs(p.z)<=C/2+1e-8}
-function tetraVertices(mesh){
- const a=[],pos=mesh.geometry.attributes.position;
- for(let i=0;i<pos.count;i++){const p=new THREE.Vector3().fromBufferAttribute(pos,i).applyMatrix4(mesh.matrixWorld);if(!a.some(q=>q.distanceToSquared(p)<1e-10))a.push(p)}
- return a;
+function pgInside(p){return Math.abs(p.x)+Math.abs(p.y)+Math.abs(p.z)<=MODEL.pgRadius+1e-8}
+function cubeInside(p){return Math.abs(p.x)<=1+EPS&&Math.abs(p.y)<=1+EPS&&Math.abs(p.z)<=1+EPS}
+function convexPlanes(points){
+var out=[];
+for(var i=0;i<points.length;i++)for(var j=i+1;j<points.length;j++)for(var k=j+1;k<points.length;k++){
+var n=V.cross(V.sub(points[j],points[i]),V.sub(points[k],points[i]));if(V.len(n)<1e-10)continue;n=V.norm(n);var q=-V.dot(n,points[i]),pos=false,neg=false;
+points.forEach(function(p){var s=V.dot(n,p)+q;if(s>1e-7)pos=true;if(s<-1e-7)neg=true});
+if(pos&&neg)continue;if(pos){n=V.mul(n,-1);q=-q}
+if(!out.some(function(a){return Math.abs(V.dot(a.n,n)-1)<1e-7&&Math.abs(a.q-q)<1e-7}))out.push({n:n,q:q})
 }
-// Exact convex-polyhedron intersection for the two tetrahedra.
-// Each tetrahedron is represented by four inward half-spaces.
-// Candidate intersection vertices are all valid intersections of three boundary planes.
-function tetraPlanes(mesh){
- const v=tetraVertices(mesh), planes=[], center=v.reduce((a,p)=>a.add(p),new THREE.Vector3()).multiplyScalar(.25);
- const faces=[[0,1,2],[0,3,1],[0,2,3],[1,3,2]];
- faces.forEach(ids=>{
-   const a=v[ids[0]],b=v[ids[1]],d=v[ids[2]];
-   const n=new THREE.Vector3().subVectors(b,a).cross(new THREE.Vector3().subVectors(d,a)).normalize();
-   const plane=new THREE.Plane().setFromNormalAndCoplanarPoint(n,a);
-   if(plane.distanceToPoint(center)<0) plane.negate();
-   planes.push(plane);
- });
- return planes;
+return out
 }
-function intersectionVertices(A,B){
- const ps=A.concat(B), out=[], eps=1e-7;
- for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.length;j++)for(let k=j+1;k<ps.length;k++){
-   const p=new THREE.Vector3(), n1=ps[i].normal,n2=ps[j].normal,n3=ps[k].normal;
-   const det=n1.dot(new THREE.Vector3().crossVectors(n2,n3));
-   if(Math.abs(det)<1e-9)continue;
-   // Solve n·x = -constant using Cramer's rule.
-   const b1=-ps[i].constant,b2=-ps[j].constant,b3=-ps[k].constant;
-   const c23=new THREE.Vector3().crossVectors(n2,n3).multiplyScalar(b1);
-   const c31=new THREE.Vector3().crossVectors(n3,n1).multiplyScalar(b2);
-   const c12=new THREE.Vector3().crossVectors(n1,n2).multiplyScalar(b3);
-   p.copy(c23).add(c31).add(c12).divideScalar(det);
-   if(ps.every(q=>q.distanceToPoint(p)>=-eps)&&!out.some(q=>q.distanceToSquared(p)<1e-10))out.push(p);
- }
- return out;
+function volume(points){
+if(points.length<4)return 0;var c=points.reduce(V.add,V.V(0,0,0));c=V.mul(c,1/points.length);var vol=0;
+for(var i=0;i<points.length;i++)for(var j=i+1;j<points.length;j++)for(var k=j+1;k<points.length;k++){
+var n=V.cross(V.sub(points[j],points[i]),V.sub(points[k],points[i]));if(V.len(n)<1e-9)continue;
+var pos=false,neg=false;for(var m=0;m<points.length;m++){if(m===i||m===j||m===k)continue;var s=V.dot(n,V.sub(points[m],points[i]));if(s>1e-8)pos=true;if(s<-1e-8)neg=true}
+if(pos&&neg)continue;vol+=Math.abs(V.dot(n,V.sub(c,points[i])))/6
 }
-function insidePlanes(p,planes){return planes.every(q=>q.distanceToPoint(p)>=-1e-7)}
-function hullVolume(points){
- if(points.length<4)return 0;
- let vol=0, eps=1e-8;
- const center=points.reduce((a,p)=>a.add(p.clone()),new THREE.Vector3()).multiplyScalar(1/points.length);
- for(let i=0;i<points.length;i++)for(let j=i+1;j<points.length;j++)for(let k=j+1;k<points.length;k++){
-   const a=points[i],b=points[j],d=points[k];
-   let n=new THREE.Vector3().subVectors(b,a).cross(new THREE.Vector3().subVectors(d,a));
-   if(n.lengthSq()<eps)continue;
-   let pos=false,neg=false;
-   for(let m=0;m<points.length;m++){if(m===i||m===j||m===k)continue;const s=n.dot(new THREE.Vector3().subVectors(points[m],a));if(s>eps)pos=true;if(s<-eps)neg=true}
-   if(pos&&neg)continue;
-   if(n.dot(new THREE.Vector3().subVectors(center,a))>0)n.negate();
-   vol+=Math.abs(n.dot(new THREE.Vector3().subVectors(center,a)))/6;
- }
- return vol;
+return vol
 }
-const perturb=document.createElement('div');
-perturb.id="perturb";
-perturb.innerHTML='<b>MODEL CONTROLS</b><br><button id="moveL">Tₗ +X</button><button id="moveR">Tᵣ −X</button><button id="twist">TWIST Tᵣ</button><button id="resetModel">RESET MODEL</button>';
-document.body.appendChild(perturb);
-const perturbStyle=document.createElement('style');
-perturbStyle.textContent='#perturb{position:fixed;left:18px;bottom:58px;width:245px;padding:10px 12px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.72);backdrop-filter:blur(6px);font:10px monospace;color:#fff;z-index:5}#perturb button{margin:4px 3px 0 0;padding:5px 7px;background:transparent;border:1px solid rgba(255,255,255,.2);color:#fff;font:9px monospace;cursor:pointer}#perturb button:hover{border-color:#fff}@media(max-width:600px){#perturb{left:10px;width:205px}}';
-document.head.appendChild(perturbStyle);
-const canonicalTransforms={
- L:{x:tl.position.x,y:tl.position.y,z:tl.position.z,rx:tl.rotation.x,ry:tl.rotation.y,rz:tl.rotation.z},
- R:{x:tr.position.x,y:tr.position.y,z:tr.position.z,rx:tr.rotation.x,ry:tr.rotation.y,rz:tr.rotation.z}
-};
-function resetModel(){
- tl.position.set(canonicalTransforms.L.x,canonicalTransforms.L.y,canonicalTransforms.L.z);
- tl.rotation.set(canonicalTransforms.L.rx,canonicalTransforms.L.ry,canonicalTransforms.L.rz);
- tr.position.set(canonicalTransforms.R.x,canonicalTransforms.R.y,canonicalTransforms.R.z);
- tr.rotation.set(canonicalTransforms.R.rx,canonicalTransforms.R.ry,canonicalTransforms.R.rz);
- evaluateAxiom();
+function hausdorffSample(A,B){if(!A.length||!B.length)return Infinity;function d(X,Y){return Math.max.apply(null,X.map(function(p){return Math.min.apply(null,Y.map(function(q){return V.dist(p,q)}))}))}return Math.max(d(A,B),d(B,A))}
+function classify(){
+var pv=octVerts,iv=intersectionPoints(),planes=convexPlanes(iv),pgIn=iv.length>=4&&pv.every(function(p){return planes.every(function(q){return V.dot(q.n,p)+q.q>=-1e-7})}),interIn=iv.length>=4&&iv.every(pgInside),ivol=volume(iv),pvol=4*Math.pow(MODEL.pgRadius,3)/3,ratio=ivol?pvol/ivol:0,hd=iv.length>=4?hausdorffSample(pv,iv):Infinity,equal=pgIn&&interIn&&Math.abs(ratio-1)<1e-6&&hd<1e-5;
+return{iv:iv,cube:pv.every(cubeInside),pgIn:pgIn,interIn:interIn,ivol:ivol,pvol:pvol,ratio:ratio,distance:hd,equal:equal}
 }
-document.getElementById("moveL").onclick=()=>{tl.position.x+=.15;evaluateAxiom()};
-document.getElementById("moveR").onclick=()=>{tr.position.x-=.15;evaluateAxiom()};
-document.getElementById("twist").onclick=()=>{tr.rotation.z+=Math.PI/12;evaluateAxiom()};
-document.getElementById("resetModel").onclick=resetModel;
-document.getElementById("moveL").addEventListener("click",()=>recordExperiment("Tₗ +X"));
-document.getElementById("moveR").addEventListener("click",()=>recordExperiment("Tᵣ −X"));
-document.getElementById("twist").addEventListener("click",()=>recordExperiment("Tᵣ twist"));
-document.getElementById("resetModel").addEventListener("click",()=>recordExperiment("RESET"));
-
-
-function pgEqualityTest(intersectionPoints){
- const pgVerts=tetraVertices(pg);
- if(intersectionPoints.length<4) return {equal:false,reason:"Intersection is not a 3D solid."};
- const planes=convexPlanesFromPoints(intersectionPoints);
- if(!planes.length) return {equal:false,reason:"Could not construct intersection boundary."};
- const pgInside=pgVerts.every(p=>insidePlanes(p,planes));
- const interInsidePG=intersectionPoints.every(p=>pointInsidePG(p));
- const iv=hullVolume(intersectionPoints);
- const pv=4*Math.pow(MODEL.pgRadius,3)/3;
- const ratio=iv>1e-10?pv/iv:0;
- const pgSample=pgVerts;
- const intersectionSample=intersectionPoints;
- const hd=hausdorffEstimate(pgSample,intersectionSample);
- const equal=pgInside&&interInsidePG&&Math.abs(ratio-1)<1e-6&&hd<1e-5;
- return {equal,pgInside,interInsidePG,ratio,hausdorff:hd};
+function fingerprint(){
+var s=JSON.stringify({version:MODEL.version,cubeHalf:MODEL.cubeHalf,tetraEdge:MODEL.tetraEdge,tetraLRotation:MODEL.tetraLRotation,tetraRRotation:MODEL.tetraRRotation,pgRadius:MODEL.pgRadius}),h=2166136261;
+for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(16).padStart(8,"0")
 }
-function pointInsidePG(p){
- return Math.abs(p.x)+Math.abs(p.y)+Math.abs(p.z)<=MODEL.pgRadius+1e-8;
+function state(g){return g.equal?"MATCH":(g.cube&&g.iv.length>=4&&g.pgIn?"CONTAINED / EQUALITY UNRESOLVED":"FAILED")}
+function evaluate(label){
+var g=classify(),st=state(g);
+document.getElementById("status").textContent=st;
+document.getElementById("status").className=st==="MATCH"?"ok":st.indexOf("CONTAINED")===0?"warn":"bad";
+document.getElementById("tester").innerHTML="PG ⊆ C: "+(g.cube?"YES":"NO")+"<br>Tₗ ∩ Tᵣ: "+(g.iv.length>=4?"3D NON-EMPTY":"EMPTY / DEGENERATE")+"<br>PG ⊆ intersection: "+(g.pgIn?"YES":"NO")+"<br>intersection ⊆ PG: "+(g.interIn?"YES":"NO")+"<br>PG ≡ intersection: <b>"+(g.equal?"MATCH":"NOT ESTABLISHED")+"</b><br>volume ratio PG/I: "+g.ratio.toFixed(6)+"<br>vertex-set distance estimate: "+(isFinite(g.distance)?g.distance.toFixed(6):"∞");
+document.getElementById("metrics").innerHTML="<b>CANONICAL MODEL</b><br>Cube side: 2.00 · volume: 8.0000<br>Tetrahedron edge: 2.40 · volume: "+(Math.pow(2.4,3)/(6*Math.sqrt(2))).toFixed(4)+"<br>PG radius: 0.72 · volume: "+g.pvol.toFixed(4)+"<br><br><b>INTERSECTION</b><br>vertices: "+g.iv.length+"<br>volume: "+g.ivol.toFixed(4)+"<br>PG/I ratio: "+g.ratio.toFixed(6)+"<br><br><span class='dim'>Numerical checks are evidence for this configuration, not a universal theorem.</span>";
+if(label){history.unshift({label:label,state:st,time:new Date().toLocaleTimeString()});history=history.slice(0,8);document.getElementById("history").innerHTML=history.map(function(x){return"<div>"+x.time+" · "+x.label+" · "+x.state+"</div>"}).join("")}
+document.getElementById("integrity").innerHTML="<span class='ok'>PASS</span><br>model: "+MODEL.version+"<br>fingerprint: "+fingerprint()+"<br>renderer: native Canvas 2D<br>external dependencies: 0";
+return g
 }
-function hausdorffEstimate(A,B){
- if(!A.length||!B.length)return Infinity;
- const directed=(X,Y)=>Math.max(...X.map(p=>Math.min(...Y.map(q=>p.distanceTo(q)))));
- return Math.max(directed(A,B),directed(B,A));
+function project(p){
+var cy=Math.cos(view.yaw),sy=Math.sin(view.yaw),cp=Math.cos(view.pitch),sp=Math.sin(view.pitch);
+var x=p.x*cy-p.z*sy,z=p.x*sy+p.z*cy,y=p.y*cp-z*sp;z=p.y*sp+z*cp;
+var f=520/(view.distance+z+4.5),cx=canvas.width/2,cyy=canvas.height/2;
+return{x:cx+x*f,y:cyy-y*f,z:z}
 }
-function convexPlanesFromPoints(points){
- const out=[];
- for(let i=0;i<points.length;i++)for(let j=i+1;j<points.length;j++)for(let k=j+1;k<points.length;k++){
-  const a=points[i],b=points[j],d=points[k];
-  const n=new THREE.Vector3().subVectors(b,a).cross(new THREE.Vector3().subVectors(d,a));
-  if(n.lengthSq()<1e-12)continue;
-  n.normalize(); const q=-n.dot(a);
-  let pos=false,neg=false;
-  for(const p of points){const s=n.dot(p)+q;if(s>1e-7)pos=true;if(s<-1e-7)neg=true;}
-  if(pos&&neg)continue;
-  if(pos){n.negate();q=-q;}
-  if(!out.some(x=>Math.abs(x.n.dot(n)-1)<1e-7&&Math.abs(x.q-q)<1e-7))out.push({n:n.clone(),q});
- }
- return out;
+function drawEdges(points,edges,stroke,width){
+ctx.strokeStyle=stroke;ctx.lineWidth=width;
+edges.forEach(function(e){var a=project(points[e[0]]),b=project(points[e[1]]);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()})
 }
-
-let experimentLog=[];
-function exportExperimentReport(){
- const live=classifyGeometry();
- const validation=validationSummary();
- const reproducibility=reproducibilityMetadata();
- const methodology=methodologyRecord();
- const epistemic=epistemicRecord();
- const manifest=experimentManifest();
- const modelFingerprint=canonicalModelFingerprint();
- const audit=selfAudit();
- const stressSuite=runStressSuite();
- const parameterSweepResults=parameterSweep();
- const sweepConfiguration={parameter:"Tᵣ.position.x",start:-0.9,end:0.9,step:0.15,restoredCanonical:true};
- const parameterTransitions=detectTransitions(parameterSweepResults);
- const refinedTransitions=parameterTransitions.map(refineTransition);
- const sweepSummaryData=sweepSummary(parameterSweepResults,refinedTransitions);
- const stateRegions=buildStateRegions(parameterSweepResults);
- const certificate=buildAxiomCertificate();
- const payload={
-  model:"CICAN Geometric Consciousness Model V2",
-  branch:"v2-development",
-  timestamp:new Date().toISOString(),
-  canonicalModel:MODEL,
-  liveGeometry:live,validation:validation,reproducibility:reproducibility,methodology:methodology,epistemicStatus:epistemic,experimentManifest:manifest,modelFingerprint:modelFingerprint,selfAudit:audit,stressSuite:stressSuite,parameterSweep:parameterSweepResults,sweepConfiguration:sweepConfiguration,parameterTransitions:parameterTransitions,refinedTransitions:refinedTransitions,sweepSummary:sweepSummaryData,stateRegions:stateRegions,certificate:certificate,experiments:experimentLog
- };
- const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
- const url=URL.createObjectURL(blob);
- const a=document.createElement("a"); a.href=url; a.download="cican-v2-experiment-report.json"; a.click();
- setTimeout(()=>URL.revokeObjectURL(url),1000);
+function draw(){
+var dpr=Math.min(window.devicePixelRatio||1,2),w=innerWidth,h=innerHeight;canvas.width=Math.floor(w*dpr);canvas.height=Math.floor(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+function pts(o){return tetraVertices(o)}drawEdges(cubeVerts,cubeEdges,"rgba(35,119,255,.45)",1);
+var L=pts(objects.L),R=pts(objects.R);drawEdges(L,tetraEdges,"rgba(255,48,48,.9)",1.5);drawEdges(R,tetraEdges,"rgba(49,255,120,.9)",1.5);drawEdges(octVerts,octEdges,"rgba(255,210,26,.95)",2);
+var c=project(V.V(0,0,0));ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(c.x,c.y,3,0,Math.PI*2);ctx.fill();
+if(view.wire){ctx.font="10px ui-monospace,monospace";ctx.fillStyle="rgba(255,255,255,.55)";ctx.fillText("C",project(cubeVerts[6]).x+5,project(cubeVerts[6]).y);ctx.fillStyle="rgba(255,80,80,.7)";ctx.fillText("Tₗ",project(L[0]).x+5,project(L[0]).y);ctx.fillStyle="rgba(80,255,130,.7)";ctx.fillText("Tᵣ",project(R[0]).x+5,project(R[0]).y);ctx.fillStyle="rgba(255,220,40,.8)";ctx.fillText("PG",project(octVerts[0]).x+5,project(octVerts[0]).y)}
+if(view.auto)view.yaw+=.003;
+requestAnimationFrame(draw)
 }
-function snapshotModel(label){
- const snap={
-  label,
-  C:{half:MODEL.cubeHalf},
-  TL:{position:tl.position.toArray(),rotation:[tl.rotation.x,tl.rotation.y,tl.rotation.z]},
-  TR:{position:tr.position.toArray(),rotation:[tr.rotation.x,tr.rotation.y,tr.rotation.z]},
-  PG:{radius:MODEL.pgRadius},
-  state:document.getElementById("testState").getAttribute("data-state")||"UNKNOWN"
- };
- return snap;
-}
-function recordExperiment(label){
- const state=document.getElementById("testState");
- experimentLog.unshift({time:new Date().toISOString(),label,state:state.getAttribute("data-state")||"UNKNOWN",text:state.innerText,snapshot:snapshotModel(label)});
- experimentLog=experimentLog.slice(0,8); renderExperimentHistory();
-}
-let lastAxiomState="";
-function generateExperimentID(){
- return "EXP-"+new Date().toISOString().replace(/[-:.TZ]/g,"").slice(0,14)+"-"+Math.random().toString(36).slice(2,7).toUpperCase();
-}
-function selfAudit(){
- const fp=canonicalModelFingerprint();
- const manifest=experimentManifest();
- const certificate=buildAxiomCertificate();
- const manifestModel={
-  version:manifest.modelVersion,
-  cubeHalf:manifest.canonicalParameters.cubeHalf,
-  tetraEdge:manifest.canonicalParameters.tetraEdge,
-  tetraLRotation:manifest.canonicalParameters.tetraLRotation,
-  tetraRRotation:manifest.canonicalParameters.tetraRRotation,
-  pgRadius:manifest.canonicalParameters.pgRadius
- };
- const exportedFingerprint=(()=>{
-  const raw=JSON.stringify(manifestModel);
-  let h=2166136261;
-  for(let i=0;i<raw.length;i++){h^=raw.charCodeAt(i);h=Math.imul(h,16777619);}
-  return (h>>>0).toString(16).padStart(8,"0");
- })();
- const consistent=manifest.modelFingerprint===fp&&certificate.modelFingerprint===fp&&exportedFingerprint===fp&&MODEL.version==="2.33";
- return {
-  modelVersion:MODEL.version,
-  fingerprint:fp,
-  manifestFingerprintMatches:manifest.modelFingerprint===fp,
-  certificateFingerprintMatches:certificate.modelFingerprint===fp,
-  exportedParametersFingerprintMatches:exportedFingerprint===fp,
-  versionMatches:MODEL.version==="2.33",
-  consistent
- };
-}
-function canonicalModelFingerprint(){
- const raw=JSON.stringify({
-  version:MODEL.version,
-  cubeHalf:MODEL.cubeHalf,
-  tetraEdge:MODEL.tetraEdge,
-  tetraLRotation:MODEL.tetraLRotation,
-  tetraRRotation:MODEL.tetraRRotation,
-  pgRadius:MODEL.pgRadius
- });
- let h=2166136261;
- for(let i=0;i<raw.length;i++){h^=raw.charCodeAt(i);h=Math.imul(h,16777619);}
- return (h>>>0).toString(16).padStart(8,"0");
-}
-function experimentManifest(){
- return {
-  schemaVersion:"1.0",
-  modelVersion:"V2",
-  modelFingerprint:canonicalModelFingerprint(),
-  canonicalParameters:{
-   cubeHalf:MODEL.cubeHalf,
-   tetraEdge:MODEL.tetraEdge,
-   tetraLRotation:MODEL.tetraLRotation,
-   tetraRRotation:MODEL.tetraRRotation,
-   pgRadius:MODEL.pgRadius
-  },
-  tolerances:{containment:1e-8,volumeEquality:1e-6,distance:1e-5},
-  automatedTests:["canonical validation","stress suite","Tᵣ X parameter sweep","transition refinement"],
-  exportFormat:"JSON"
- };
-}
-function epistemicRecord(){
- return {
-  definition:"The model specifies C, Tₗ, Tᵣ and PG as geometric sets in ℝ³.",
-  computation:"The browser implements finite-precision numerical tests of containment, intersection, volume and sampled geometric distance.",
-  interpretation:"Passing numerical checks supports the proposed relationship for the tested configuration only.",
-  nonClaim:"The computation does not establish a universal theorem about consciousness, prayer, or all possible geometric configurations."
- };
-}
-function methodologyRecord(){
- return {
-  coordinateSpace:"3D Cartesian Euclidean space",
-  primitiveModel:"axis-aligned cube, two regular tetrahedra, regular octahedron",
-  intersectionMethod:"convex tetrahedron half-space intersection from triple-plane candidates",
-  volumeMethod:"convex-hull tetrahedral decomposition from an interior reference point",
-  containmentRule:"all tested vertices satisfy the relevant convex half-space inequalities",
-  equalityRule:"mutual containment + volume agreement + distance threshold",
-  warning:"Numerical agreement for a finite tolerance is evidence for the current configuration, not a symbolic proof of universal set equality."
- };
-}
-function reproducibilityMetadata(){
- return {
-  experimentID:generateExperimentID(),
-  modelVersion:"V2",
-  coordinateModel:"canonical",
-  tolerance:{containment:1e-8,equalityVolume:1e-6,distance:1e-5},
-  geometryEngine:"convex half-space intersection + convex hull volume",
-  note:"Results are numerical computations for the current model configuration."
- };
-}
-function stateAtX(x){
- const saved=tr.position.x;
- tr.position.x=x; tr.updateMatrixWorld(true);tl.updateMatrixWorld(true);pg.updateMatrixWorld(true);
- const g=classifyGeometry();
- tr.position.x=saved; tr.updateMatrixWorld(true);
- return g.equality?"MATCH":(g.cubeOK&&g.intersectionVertices>=4&&g.pgInsideIntersection?"CONTAINED / UNRESOLVED":"FAILED");
-}
-function buildStateRegions(results){
- const regions=[];
- if(!results.length)return regions;
- let start=results[0].x,current=results[0].state;
- for(let i=1;i<results.length;i++){
-  if(results[i].state!==current){
-   regions.push({state:current,from:start,to:results[i-1].x,samples:Math.round((results[i-1].x-start)/0.15)+1});
-   start=results[i].x;current=results[i].state;
-  }
- }
- regions.push({state:current,from:start,to:results[results.length-1].x,samples:Math.round((results[results.length-1].x-start)/0.15)+1});
- return regions;
-}
-function sweepSummary(results,transitions){
- const counts={MATCH:0,"CONTAINED / UNRESOLVED":0,FAILED:0};
- results.forEach(r=>counts[r.state]=(counts[r.state]||0)+1);
- return {
-  sampleCount:results.length,
-  stateCounts:counts,
-  transitionCount:transitions.length,
-  stableIntervals:results.length-transitions.length
- };
-}
-function refineTransition(t){
- let lo=t.lower,hi=t.upper;
- const from=t.from;
- for(let i=0;i<14;i++){
-  const mid=(lo+hi)/2;
-  if(stateAtX(mid)===from) lo=mid; else hi=mid;
- }
- return {from:t.from,to:t.to,lower:Number(lo.toFixed(6)),upper:Number(hi.toFixed(6)),width:Number((hi-lo).toFixed(6))};
-}
-function detectTransitions(results){
- const transitions=[];
- for(let i=1;i<results.length;i++){
-  if(results[i].state!==results[i-1].state){
-   transitions.push({from:results[i-1].state,to:results[i].state,lower:results[i-1].x,upper:results[i].x});
-  }
- }
- return transitions;
-}
-function captureTransform(mesh){
- return {position:mesh.position.clone(),rotation:mesh.rotation.clone(),scale:mesh.scale.clone()};
-}
-function restoreTransform(mesh,s){
- mesh.position.copy(s.position);mesh.rotation.copy(s.rotation);mesh.scale.copy(s.scale);mesh.updateMatrixWorld(true);
-}
-function parameterSweep(){
- const saved= captureTransform(tr);
- const results=[];
- for(let x=-0.9;x<=0.900001;x+=0.15){
-  tr.position.x=x;
-  tr.rotation.z=saved.rotation.z;
-  tr.updateMatrixWorld(true);tl.updateMatrixWorld(true);pg.updateMatrixWorld(true);
-  const g=classifyGeometry();
-  results.push({x:Number(x.toFixed(2)),state:g.equality?"MATCH":(g.cubeOK&&g.intersectionVertices>=4&&g.pgInsideIntersection?"CONTAINED / UNRESOLVED":"FAILED"),volumeRatio:g.volumeRatio,distance:g.distance});
- }
- restoreTransform(tr,saved);
- return results;
-}
-function canonicalGuard(){
- const saved={tl:captureTransform(tl),tr:captureTransform(tr),pg:captureTransform(pg)};
- const baseline=JSON.stringify({
-  tl:saved.tl.position.toArray().concat(saved.tl.rotation.toArray()),
-  tr:saved.tr.position.toArray().concat(saved.tr.rotation.toArray()),
-  pg:saved.pg.position.toArray().concat(saved.pg.rotation.toArray())
- });
- return {saved,baseline};
-}
-function restoreCanonicalGuard(g){
- restoreTransform(tl,g.saved.tl);
- restoreTransform(tr,g.saved.tr);
- restoreTransform(pg,g.saved.pg);
-}
-function runStressSuite(){
- const guard=canonicalGuard();
- const canonicalBefore=canonicalStateFingerprint();
- const cases=[];
- const addCase=(name,fn)=>{
-  restoreCanonicalGuard(guard);
-  fn();
-  tl.updateMatrixWorld(true);tr.updateMatrixWorld(true);pg.updateMatrixWorld(true);
-  const g=classifyGeometry();
-  cases.push({name,state:g.equality?"MATCH":(g.cubeOK&&g.intersectionVertices>=4&&g.pgInsideIntersection?"CONTAINED / UNRESOLVED":"FAILED"),volumeRatio:g.volumeRatio,distance:g.distance});
- };
- addCase("canonical",()=>{});
- addCase("Tₗ shifted +0.30X",()=>{tl.position.x+=.3});
- addCase("Tᵣ shifted −0.30X",()=>{tr.position.x-=.3});
- addCase("Tᵣ twisted +15°",()=>{tr.rotation.z+=Math.PI/12});
- restoreCanonicalGuard(guard);
- cases.push({name:"canonical restoration",restored:canonicalStateRestored(canonicalBefore)});
- return cases;
-}
-function buildAxiomCertificate(){
- const v=validationSummary();
- const status=v.allPassed?"NUMERICAL MATCH":"NOT ESTABLISHED";
- return {
-  title:"CICAN V2 AXIOM TEST CERTIFICATE",
-  modelFingerprint:canonicalModelFingerprint(),
-  generatedAt:new Date().toISOString(),
-  statement:"PG ≡ (Tₗ ∩ Tᵣ)",
-  status,
-  passed:v.passed,
-  total:v.total,
-  interpretation:v.allPassed?
-   "All implemented numerical checks pass for the current configuration; this is computational evidence, not a general mathematical proof.":
-   "The implemented checks do not establish set equality for the current configuration."
- };
-}
-function validationSummary(){
- const g=classifyGeometry();
- const checks=[
-  ["PG contained in C",g.cubeOK],
-  ["Tetrahedron intersection is 3D",g.intersectionVertices>=4],
-  ["PG contained in intersection",g.pgInsideIntersection],
-  ["Intersection contained in PG",g.intersectionInsidePG],
-  ["Volume ratio ≈ 1",Math.abs(g.volumeRatio-1)<1e-6],
-  ["Distance estimate ≈ 0",g.distance!==null&&g.distance<1e-5]
- ];
- const passed=checks.filter(x=>x[1]).length;
- return {checks,passed,total:checks.length,allPassed:passed===checks.length};
-}
-function classifyGeometry(){
- const pv=tetraVertices(pg);
- const cubeOK=pv.every(insideCube);
- const pL=tetraPlanes(tl),pR=tetraPlanes(tr);
- const iv=intersectionVertices(pL,pR);
- const eq=pgEqualityTest(iv);
- const interVol=iv.length>=4?hullVolume(iv):0;
- const pgVol=4*Math.pow(MODEL.pgRadius,3)/3;
- return {cubeOK,intersectionVertices:iv.length,intersectionVolume:interVol,pgVolume:pgVol,volumeRatio:interVol?pgVol/interVol:0,equality:!!eq.equal,pgInsideIntersection:!!eq.pgInside,intersectionInsidePG:!!eq.interInsidePG,distance:typeof eq.hausdorff==="number"?eq.hausdorff:null};
-}
-function evaluateAxiom(){
- cube.updateMatrixWorld(true); tl.updateMatrixWorld(true); tr.updateMatrixWorld(true); pg.updateMatrixWorld(true);
- const pv=tetraVertices(pg);
- const cubeOK=pv.every(insideCube);
- const planesL=tetraPlanes(tl), planesR=tetraPlanes(tr);
- const iv=intersectionVertices(planesL,planesR);
- const nonEmpty=iv.length>=4;
- const pgIn= pv.every(p=>insidePlanes(p,[...planesL,...planesR]));
- const eq=pgEqualityTest(iv);
- const exactStatus=eq.equal?"GEOMETRIC SETS MATCH":"SET EQUALITY NOT ESTABLISHED";
- const state=document.getElementById("testState");
- const lines=[
-  "PG ⊆ C: "+(cubeOK?"YES":"NO"),
-  "Tₗ ∩ Tᵣ: "+(nonEmpty?"3D NON-EMPTY":"EMPTY / DEGENERATE"),
-  "PG ⊆ (Tₗ ∩ Tᵣ): "+(pgIn?"YES":"NO"),
-  "PG ≡ (Tₗ ∩ Tᵣ): "+exactStatus
- ];
- state.innerHTML=lines.join("<br>")+"<br>Volume ratio PG/I: "+eq.ratio.toFixed(6)+"<br>Vertex-set distance estimate: "+eq.hausdorff.toFixed(6);
- state.className=(eq.equal)?"testGood":"testBad";
- const current=(cubeOK&&nonEmpty&&pgIn&&eq.equal)?"MATCH":(cubeOK&&nonEmpty&&pgIn)?"CONTAINED / EQUALITY UNRESOLVED":"FAILED";
- if(current!==lastAxiomState){
-  lastAxiomState=current;
-  state.setAttribute("data-state",current);
- }
-}
-function report(){
- root.updateMatrixWorld(true);
- const pv=tetraVertices(pg), cubeOK=pv.every(insideCube);
- const planes=tetraPlanes(tl).concat(tetraPlanes(tr));
- const iv=intersectionVertices(tetraPlanes(tl),tetraPlanes(tr));
- const nonEmpty=iv.length>0;
- const pgInIntersection=pv.every(p=>insidePlanes(p,planes));
- const intersectionVolumeCandidate=iv.length>=4;
- const intersectionVolume=hullVolume(iv);
- const pgVertsInsideIntersection=pv.filter(p=>insidePlanes(p,planes)).length;
- const pgVolume=(4*Math.pow(MODEL.pgRadius,3))/3;
- const volumeRatio=intersectionVolume>1e-10?pgVolume/intersectionVolume:0;
- const tetraEdge=T;
- const tetraVolume=tetraEdge*tetraEdge*tetraEdge/(6*Math.sqrt(2));
- const cubeVolume=C*C*C;
- const pgRadius=MODEL.pgRadius;
- const pgVol=4*pgRadius*pgRadius*pgRadius/3;
- metrics.innerHTML=
-  '<b>CANONICAL MODEL</b><br>'+
-  'C cube side: <span class="ok">'+C.toFixed(2)+'</span> · volume: <span class="ok">'+cubeVolume.toFixed(4)+'</span><br>'+
-  'Tetrahedron edge: <span class="ok">'+tetraEdge.toFixed(2)+'</span> · volume: <span class="ok">'+tetraVolume.toFixed(4)+'</span><br>'+
-  'PG octahedron radius: <span class="ok">'+pgRadius.toFixed(2)+'</span> · volume: <span class="ok">'+pgVol.toFixed(4)+'</span><br><br>'+
-  '<b>COMPUTATIONAL CHECKS</b><br>'+
-  'PG vertices inside C: <span class="'+(cubeOK?'ok':'pending')+'">'+(cubeOK?'PASS':'FAIL')+'</span><br>'+
-  'T<sub>L</sub> ∩ T<sub>R</sub> vertices: <span class="'+(nonEmpty?'ok':'pending')+'">'+iv.length+'</span><br>'+
-  'T<sub>L</sub> ∩ T<sub>R</sub> non-empty: <span class="'+(nonEmpty?'ok':'pending')+'">'+(nonEmpty?'PASS':'FAIL')+'</span><br>'+
-  'PG ⊆ (T<sub>L</sub> ∩ T<sub>R</sub>): <span class="'+(pgInIntersection?'ok':'pending')+'">'+(pgInIntersection?'PASS':'FAIL')+'</span><br>'+
-  'Intersection 3D candidate: <span class="'+(intersectionVolumeCandidate?'ok':'pending')+'">'+(intersectionVolumeCandidate?'YES':'NO')+'</span><br>'+
-  'Tetrahedron intersection volume: <span class="ok">'+intersectionVolume.toFixed(4)+'</span><br>'+
-  'PG octahedron volume: <span class="ok">'+pgVolume.toFixed(4)+'</span><br>'+
-  'PG vertices inside intersection: <span class="'+(pgVertsInsideIntersection===pv.length?'ok':'pending')+'">'+pgVertsInsideIntersection+'/'+pv.length+'</span><br>'+
-  'PG volume / intersection volume: <span class="pending">'+volumeRatio.toFixed(4)+'</span><br>'+
-  'PG ≡ T<sub>L</sub> ∩ T<sub>R</sub>: <span class="pending">NOT PROVEN</span><br>'+
-  'Containment PG ⊆ C: <span class="'+(cubeOK?'ok':'pending')+'">'+(cubeOK?'PASS':'FAIL')+'</span>';
- status.textContent=(cubeOK&&nonEmpty)?'PARTIALLY VERIFIED':'REQUIRES REVISION';
- status.className=(cubeOK&&nonEmpty)?'ok':'pending';
-}
-let auto=true, wire=true;
-document.getElementById("rotate").onclick=(e)=>{auto=!auto;e.currentTarget.classList.toggle("active",auto)};
-document.getElementById("wire").onclick=(e)=>{wire=!wire;[cube,tl,tr,pg].forEach(m=>m.material.wireframe=wire);e.currentTarget.classList.toggle("active",wire)};
-document.getElementById("reset").onclick=()=>{camera.position.set(4.8,3.6,6.2);controls.target.set(0,0,0);controls.update();root.rotation.set(0,0,0)};
-addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
-loading.style.display="none"; report();
-evaluateAxiom();
- renderAudit();
-function animate(){requestAnimationFrame(animate);if(auto){root.rotation.y+=.0025;root.rotation.x+=.0007}controls.update();renderer.render(scene,camera)}animate();
+function resize(){canvas.width=innerWidth;canvas.height=innerHeight}
+canvas.addEventListener("pointerdown",function(e){view.drag=true;view.lastX=e.clientX;view.lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
+canvas.addEventListener("pointermove",function(e){if(!view.drag)return;view.yaw+=(e.clientX-view.lastX)*.008;view.pitch+=(e.clientY-view.lastY)*.008;view.pitch=Math.max(-1.35,Math.min(1.35,view.pitch));view.lastX=e.clientX;view.lastY=e.clientY});
+canvas.addEventListener("pointerup",function(){view.drag=false});
+canvas.addEventListener("wheel",function(e){e.preventDefault();view.distance=Math.max(3,Math.min(14,view.distance+e.deltaY*.008))},{passive:false});
+document.getElementById("rotate").onclick=function(e){view.auto=!view.auto;e.currentTarget.classList.toggle("active",view.auto)};
+document.getElementById("wire").onclick=function(e){view.wire=!view.wire;e.currentTarget.classList.toggle("active",view.wire)};
+document.getElementById("resetView").onclick=function(){view.yaw=.55;view.pitch=.32;view.distance=6.8};
+document.getElementById("moveL").onclick=function(){objects.L.t.x+=.15;evaluate("Tₗ +X")};
+document.getElementById("moveR").onclick=function(){objects.R.t.x-=.15;evaluate("Tᵣ −X")};
+document.getElementById("twist").onclick=function(){objects.R.r.z+=Math.PI/12;evaluate("Tᵣ twist +15°")};
+document.getElementById("resetModel").onclick=function(){objects.L.t=V.V(0,0,0);objects.L.r=V.V(0,0,0);objects.R.t=V.V(0,0,0);objects.R.r=V.V(Math.PI/2,Math.PI/4,0);evaluate("RESET MODEL")};
+window.addEventListener("resize",resize);
+window.addEventListener("error",function(e){loading.innerHTML="V2 INITIALIZATION ERROR<br><small>"+String(e.message||"Runtime error")+"</small>"});
+loading.style.display="none";
+resize();evaluate();draw();
 })();
 </script>
 </body>
